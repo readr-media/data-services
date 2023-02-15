@@ -9,10 +9,10 @@ app = Flask(__name__)
 def generate_json_from_gql():
 	gql_endpoint = request.args.get('gql_endpoint')
 	gql_string = request.args.get('gql_string')
-	gcs_path = request.args.get('bucket')
+	bucket = request.args.get('bucket')
 	dest_file = request.args.get('dest_file')
 	json_data = gql2json(gql_endpoint, gql_string)
-	upload_data(gcs_path, json.dumps(json_data, ensure_ascii=False).encode('utf8'), 'application/json', gcs_path + dest_file)
+	upload_data(bucket, json.dumps(json_data, ensure_ascii=False).encode('utf8'), 'application/json', dest_file)
 	return "ok"
 
 if __name__ == "__main__":
