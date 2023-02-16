@@ -39,8 +39,7 @@ def sheet2json( url, sheet ):
 					values[field_name[field]] = ''
 			all_rows.append(values)
 
-	json_string = json.dumps(all_rows, ensure_ascii=False)
-	return json_string
+	return all_rows
 	
 
 def gql2json(gql_endpoint, gql_string):
