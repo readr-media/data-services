@@ -3,12 +3,45 @@ import re
 import json
 import sys
 import codecs
+import pygsheets
 from gql.transport.aiohttp import AIOHTTPTransport
 from gql import gql, Client
 from datetime import datetime, timedelta
 from google.cloud import datastore
 from google.oauth2 import service_account
 from google.cloud import storage
+
+def sheet2json( url, sheet ):
+
+	gc = pygsheets.authorize(service_account_env_var = 'GDRIVE_API_CREDENTIALS')
+	sht = gc.open_by_url( url )
+
+	meta_sheet = sht.worksheet_by_title(sheet)
+	meta_data = meta_sheet.get_all_values()
+	#if sheet_name == 'translateurl_for_website':
+	#    field_shift = 1
+	#else:
+	#    field_shift = 0
+
+		#get the field name
+	field_name = []
+	for f in meta_data[0]:
+		if f != '':
+			field_name.append(f)
+	all_rows = []
+	for row in range(1, len(meta_data)):
+		if meta_data[row][1] != '':
+			values = {}
+			for field in range(0, len(field_name)):
+				if field < len(meta_data[row]):
+					values[field_name[field]] = meta_data[row][field]
+				else:
+					values[field_name[field]] = ''
+			all_rows.append(values)
+
+	json_string = json.dumps(all_rows, ensure_ascii=False)
+	return json_string
+	
 
 def gql2json(gql_endpoint, gql_string):
     #bucket = os.environ['BUCKET']
@@ -61,5 +94,9 @@ query { allPosts(where: { tags_every: {name_in: "疫苗"}, state: published }, o
   }
 }
 """
-    gql_endpoint = "https://api-dev.example.com"
-    gql2json(gql_endpoint, gql_string)
+    #gql_endpoint = "https://api-dev.example.com"
+    #gql2json(gql_endpoint, gql_string)
+    keyfile = { }
+    os.environ['GDRIVE_API_CREDENTIALS'] = json.dumps(keyfile)
+    sheet_content = sheet2json("https://docs.google.com/spreadsheets/d/19Z9vgm9nIV1ZltljKQIzHDR_HhVp3WO0N4K2dCYzmrY/edit#gid=1662192222", "Content")
+    print(sheet_content)
