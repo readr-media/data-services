@@ -1,5 +1,5 @@
 Flask==2.0.2
-pysheets==1.0.3
+pygsheets==2.0.5
 aiohttp==3.8.1
 uWSGI==2.0.17.1
 requests==2.22.0
