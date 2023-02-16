@@ -23,6 +23,7 @@ def generate_json_from_sheet():
 	dest_file = request.args.get('dest_file')
 	json_data = sheet2json(sheet_url, sheet_name)
 	upload_data(bucket, json.dumps(json_data, ensure_ascii=False).encode('utf8'), 'application/json', dest_file)
+	return "ok"
     
 
 if __name__ == "__main__":
