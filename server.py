@@ -1,5 +1,5 @@
 from flask import Flask, request
-from data_export import gql2json, upload_data
+from data_export import sheet2json, gql2json, upload_data
 import os
 import json
 
