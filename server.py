@@ -1,5 +1,6 @@
 from flask import Flask, request
 from data_export import sheet2json, gql2json, upload_data
+from rss_generator import gql2rss
 import os
 import json
 
@@ -26,5 +27,20 @@ def generate_json_from_sheet():
 	return "ok"
     
 
+@app.route("/k6_to_rss")
+def generate_rss_from_k6():
+	gql_endpoint = request.args.get('gql_endpoint')
+	gql_string = request.args.get('gql_string')
+	bucket = request.args.get('bucket')
+	dest_file = request.args.get('dest_file')
+	feed_config = request.args.get('feed_config')
+	relatedPost = request.args.get('relatedPost')
+	rm_ytbiframe = request.args.get('rm_ytbiframe')
+	print(gql_endpoint)
+	print(gql_string)
+	print(feed_config)
+	rss_data = gql2rss(gql_endpoint, gql_string, json.loads(feed_config), relatedPost, rm_ytbiframe)
+	upload_data(bucket, rss_data, 'application/xml', dest_file)
+	return "ok"
 if __name__ == "__main__":
     app.run()
