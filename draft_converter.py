@@ -1,4 +1,4 @@
-from draftjs_exporter.constants import BLOCK_TYPES, ENTITY_TYPES
+from draftjs_exporter.constants import BLOCK_TYPES, ENTITY_TYPES, INLINE_STYLES
 from draftjs_exporter.defaults import BLOCK_MAP, STYLE_MAP
 from draftjs_exporter.dom import DOM
 from draftjs_exporter.html import HTML
@@ -33,6 +33,20 @@ def embeddedcode(props):
 def divider(props):
     return DOM.create_element("hr")
 
+def colorbox(props):
+    return DOM.create_element('div', {
+        'color': props.get('color')
+    }, props["children"])
+
+def entity_fallback(props):
+    return DOM.create_element(
+        "span", {"class": "missing-entity"}, props["children"]
+    )
+
+
+def style_fallback(props):
+    return props["children"]
+
 
 config = {
     "block_map": dict(
@@ -43,13 +57,23 @@ config = {
     ),
     'entity_decorators': {
         'image': image,
+        "IMAGE": image,
         ENTITY_TYPES.LINK: link,
-        'EMBEDDEDCODE': embeddedcode,
-        'DIVIDER': divider,
-        'ANNOTATION'
-        'TABLE': None,
-        '': None
+        "EMBEDDEDCODE": embeddedcode,
+        "DIVIDER": divider,
+        "COLORBOX": colorbox,
+        "ANNOTATION": entity_fallback,
+        "INFOBOX": entity_fallback,
+        ENTITY_TYPES.FALLBACK: entity_fallback,
+        
     },
+    "style_map": dict(
+            STYLE_MAP,
+            **{
+                # Provide a fallback component (advanced).
+                INLINE_STYLES.FALLBACK: style_fallback,
+            },
+        )
 }
 
 
