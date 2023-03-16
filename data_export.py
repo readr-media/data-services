@@ -48,7 +48,7 @@ def gql2json(gql_endpoint, gql_string):
     gql_transport = AIOHTTPTransport(url=gql_endpoint)
     gql_client = Client(transport=gql_transport,
                         fetch_schema_from_transport=False)
-    sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
+    # sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
 
     query = gql(gql_string)
     json_data = gql_client.execute(query)
