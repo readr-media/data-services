@@ -33,10 +33,12 @@ def embeddedcode(props):
 def divider(props):
     return DOM.create_element("hr")
 
+
 def colorbox(props):
     return DOM.create_element('div', {
         'color': props.get('color')
     }, props["children"])
+
 
 def entity_fallback(props):
     return DOM.create_element(
@@ -62,18 +64,16 @@ config = {
         "EMBEDDEDCODE": embeddedcode,
         "DIVIDER": divider,
         "COLORBOX": colorbox,
-        "ANNOTATION": entity_fallback,
-        "INFOBOX": entity_fallback,
         ENTITY_TYPES.FALLBACK: entity_fallback,
-        
+
     },
     "style_map": dict(
-            STYLE_MAP,
-            **{
-                # Provide a fallback component (advanced).
-                INLINE_STYLES.FALLBACK: style_fallback,
-            },
-        )
+        STYLE_MAP,
+        **{
+            # Provide a fallback component (advanced).
+            INLINE_STYLES.FALLBACK: style_fallback,
+        },
+    )
 }
 
 
