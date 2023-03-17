@@ -59,7 +59,6 @@ def gql2rss(gql_endpoint: str, gql_string: str, feed_config: dict, relatedPost_p
                 publishedDate = post['publishDate']
         if publishedDate is None:
             publishedDate = post['createdAt']
-        print(post['id'])
         fe.pubDate(util.formatRFC2822(parser.isoparse(publishedDate).astimezone(__timezone__)))
         if post['updatedAt']:
             fe.updated(util.formatRFC2822(parser.isoparse(post['updatedAt']).astimezone(__timezone__)))
