@@ -56,7 +56,7 @@ def gql2rss(gql_endpoint: str, gql_string: str, feed_config: dict, relatedPost_p
             try:
                 publishedDate = post['publishTime']
             except KeyError:
-                    publishedDate = post['publishDate']
+                publishedDate = post['publishDate']
         if publishedDate is None:
             publishedDate = post['createdAt']
         print(post['id'])
@@ -75,7 +75,10 @@ def gql2rss(gql_endpoint: str, gql_string: str, feed_config: dict, relatedPost_p
                 content += '<img src="%s" alt="%s" />' % (img, post['heroCaption'])
             else:
                 content += '<img src="%s" />' % (img)
-        brief = post['brief']
+        try:
+            brief = post['brief']
+        except KeyError:
+            brief = post['summary']
         if brief:
             brief = re.sub(escapse_char, '', convert_draft_to_html(brief))
             fe.description(description=brief, isSummary=True)
