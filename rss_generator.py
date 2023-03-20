@@ -8,18 +8,27 @@ from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
 import hashlib
 import re
-from draft_converter import convert_draft_to_html
+import os
+from utils.draft_converter import convert_draft_to_html
+from configs import field_name_mapping, feed_config_mapping
+PROJECT_NAME = os.environ['PROJECT_NAME']
 
 
-def gql2rss(gql_endpoint: str, gql_string: str, feed_config: dict, relatedPost_prefix: str, rm_ytbiframe=False):
+def gql2rss(gql_endpoint: str, gql_string: str, relatedPost_prefix: str, rm_ytbiframe=False):
     escapse_char = u'[^\u0020-\uD7FF\u0009\u000A\u000D\uE000-\uFFFD\U00010000-\U0010FFFF]+'
     gql_transport = AIOHTTPTransport(url=gql_endpoint)
     gql_client = Client(transport=gql_transport,
                         fetch_schema_from_transport=False)
     query = gql(gql_string)
     gql_result = gql_client.execute(query)
+    if 'posts' in gql_result and gql_result['posts']:
+        posts = gql_result['posts']
+    else:
+        return None
+    feed_config = feed_config_mapping[PROJECT_NAME]
     base_url = feed_config['baseURL']
     __timezone__ = tz.gettz("Asia/Taipei")
+    field_name = field_name_mapping[PROJECT_NAME]
     fg = FeedGenerator()
     fg.load_extension('media', atom=False, rss=True)
     fg.load_extension('dc', atom=False, rss=True)
@@ -34,29 +43,17 @@ def gql2rss(gql_endpoint: str, gql_string: str, feed_config: dict, relatedPost_p
     fg.link(href=feed_config['link'], rel='alternate')
     fg.ttl(300)
     fg.language('zh-TW')
-    for post in gql_result['posts']:
-        try:
-            slug = post['slug']
-        except KeyError:
-            slug = post['id']
+    for post in posts:
+        slug = post[field_name['slug']]
         guid = hashlib.sha224((base_url+slug).encode()).hexdigest()
         fe = fg.add_entry(order='append')
         fe.id(guid)
-        try:
-            name = post['name']
-        except KeyError:
-            name = post['title']
+        name = post[field_name['name']]
         name = re.sub(escapse_char, '', name)
         fe.title(name)
         fe.link(href=base_url+slug, rel='alternate')
         fe.guid(guid)
-        try:
-            publishedDate = post['publishedDate']
-        except KeyError:
-            try:
-                publishedDate = post['publishTime']
-            except KeyError:
-                publishedDate = post['publishDate']
+        publishedDate = post[field_name['publishedDate']]
         if publishedDate is None:
             publishedDate = post['createdAt']
         fe.pubDate(util.formatRFC2822(parser.isoparse(publishedDate).astimezone(__timezone__)))
@@ -74,10 +71,7 @@ def gql2rss(gql_endpoint: str, gql_string: str, feed_config: dict, relatedPost_p
                 content += '<img src="%s" alt="%s" />' % (img, post['heroCaption'])
             else:
                 content += '<img src="%s" />' % (img)
-        try:
-            brief = post['brief']
-        except KeyError:
-            brief = post['summary']
+        brief = post[field_name['brief']]
         if brief:
             brief = re.sub(escapse_char, '', convert_draft_to_html(brief))
             fe.description(description=brief, isSummary=True)
@@ -88,34 +82,18 @@ def gql2rss(gql_endpoint: str, gql_string: str, feed_config: dict, relatedPost_p
             if rm_ytbiframe:
                 contentHtml = re.sub('<iframe.*?src="https://www.youtube.com/embed.*?</iframe>', '', contentHtml)
             content += contentHtml
-        try:
-            relateds = post['relatedPosts']
-        except KeyError:
-            relateds = post['relateds']
+        relateds = post[field_name['relatedPosts']]
         if len(relateds) > 0 and relatedPost_prefix:
             content += relatedPost_prefix
             for related_post in relateds[:3]:
-                try:
-                    related_slug = related_post['slug']
-                except KeyError:
-                    related_slug = related_post['id']
-                try:
-                    related_name = post['name']
-                except KeyError:
-                    related_name = post['title']
-                content += '<br/><a href="%s">%s</a>' % (base_url+related_slug, related_name)
+                related_slug = related_post[field_name['slug']]
+                related_name = post[field_name['name']]
+                content += '<br/><a href="%s">%s</a>' % (base_url + related_slug, related_name)
         content = re.sub(escapse_char, '', content)
         fe.content(content=content, type='CDATA')
-        try:
-            categories = post['categories']
-        except KeyError:
-            categories = post['category']
-        try:
-            fe.category(
-                list(map(lambda c: {'term': c['name'], 'label': c['name']}, categories)))
-        except KeyError:
-            fe.category(
-                list(map(lambda c: {'term': c['title'], 'label': c['title']}, categories)))
+        categories = post[field_name['categories']]
+        fe.category(
+            list(map(lambda c: {'term': c[field_name['categories_name']], 'label': c[field_name['categories_name']]}, categories)))
         if 'writers' in post and post['writers']:
             fe.dc.dc_creator(creator=list(map(lambda w: w['name'], post['writers'])))
 
@@ -152,8 +130,8 @@ if __name__ == '__main__':
         }'''
     dest_file = 'rss/standard_rss.xml'
 
-
-    rss_data = gql2rss(gql_endpoint, gql_string, feed_config, relatedPost)
+    gql_endpoint = os.environ['GQL_ENDPOINT']
+    rss_data = gql2rss(gql_endpoint, gql_string, relatedPost)
     with open(dest_file, 'w') as f:
         f.write(rss_data.decode())
         # upload_data(bucket, rss_data, 'application/xml', dest_file)

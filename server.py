@@ -29,15 +29,16 @@ def generate_json_from_sheet():
 
 @app.route("/k6_to_rss")
 def generate_rss_from_k6():
-	gql_endpoint = request.args.get('gql_endpoint')
+	gql_endpoint = os.environ['GQL_ENDPOINT']
 	gql_string = request.args.get('gql_string')
 	bucket = request.args.get('bucket')
 	dest_file = request.args.get('dest_file')
-	feed_config = request.args.get('feed_config')
 	relatedPost = request.args.get('relatedPost')
 	rm_ytbiframe = request.args.get('rm_ytbiframe')
-	rss_data = gql2rss(gql_endpoint, gql_string, json.loads(feed_config), relatedPost, rm_ytbiframe)
-	upload_data(bucket, rss_data, 'application/xml', dest_file)
-	return "ok"
+	rss_data = gql2rss(gql_endpoint, gql_string, relatedPost, rm_ytbiframe)
+	if rss_data:
+		upload_data(bucket, rss_data, 'application/xml', dest_file)
+		return "ok"
+	return "gql query error"
 if __name__ == "__main__":
     app.run()
