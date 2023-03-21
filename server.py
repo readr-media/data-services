@@ -5,10 +5,11 @@ import os
 import json
 
 app = Flask(__name__)
+gql_endpoint = os.environ['GQL_ENDPOINT']
+
 
 @app.route("/gql_to_json")
 def generate_json_from_gql():
-	gql_endpoint = request.args.get('gql_endpoint')
 	gql_string = request.args.get('gql_string')
 	bucket = request.args.get('bucket')
 	dest_file = request.args.get('dest_file')
@@ -29,7 +30,6 @@ def generate_json_from_sheet():
 
 @app.route("/k6_to_rss")
 def generate_rss_from_k6():
-	gql_endpoint = os.environ['GQL_ENDPOINT']
 	gql_string = request.args.get('gql_string')
 	bucket = request.args.get('bucket')
 	dest_file = request.args.get('dest_file')
