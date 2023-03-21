@@ -14,33 +14,11 @@ from utils.draft_converter import convert_draft_to_html
 from configs import feed_config_mapping, field_check_list
 PROJECT_NAME = os.environ['PROJECT_NAME']
 FIELD_NAME = json.loads(os.environ['FIELD_NAME_MAPPING']) 
-
- 
-def field_mapping_check():
-    for field in field_check_list:
-        if field not in FIELD_NAME:
-            print("key missing in field mapping ")
-            return
-    return True
+escapse_char = u'[^\u0020-\uD7FF\u0009\u000A\u000D\uE000-\uFFFD\U00010000-\U0010FFFF]+'
 
 
-def gql2rss(gql_endpoint: str, gql_string: str, relatedPost_prefix: str, rm_ytbiframe=False):
-    escapse_char = u'[^\u0020-\uD7FF\u0009\u000A\u000D\uE000-\uFFFD\U00010000-\U0010FFFF]+'
-    gql_transport = AIOHTTPTransport(url=gql_endpoint)
-    gql_client = Client(transport=gql_transport,
-                        fetch_schema_from_transport=False)
-    query = gql(gql_string)
-    gql_result = gql_client.execute(query)
-    if 'posts' in gql_result and gql_result['posts']:
-        posts = gql_result['posts']
-    else:
-        print('gql query failed')
-        return
-    feed_config = feed_config_mapping[PROJECT_NAME]
-    if field_mapping_check() is None:
-        return
+def gen_general_rss(data, feed_config, __timezone__, relatedPost_prefix):
     base_url = feed_config['baseURL']
-    __timezone__ = tz.gettz("Asia/Taipei")
     fg = FeedGenerator()
     fg.load_extension('media', atom=False, rss=True)
     fg.load_extension('dc', atom=False, rss=True)
@@ -55,7 +33,7 @@ def gql2rss(gql_endpoint: str, gql_string: str, relatedPost_prefix: str, rm_ytbi
     fg.link(href=feed_config['link'], rel='alternate')
     fg.ttl(300)
     fg.language('zh-TW')
-    for post in posts:
+    for post in data:
         slug = post[FIELD_NAME['slug']]
         guid = hashlib.sha224((base_url+slug).encode()).hexdigest()
         fe = fg.add_entry(order='append')
@@ -112,6 +90,53 @@ def gql2rss(gql_endpoint: str, gql_string: str, relatedPost_prefix: str, rm_ytbi
     return fg.rss_str(pretty=False, extensions=True, encoding='UTF-8', xml_declaration=True)
 
 
+def gen_line_rss(gql_data, feed_config, __timezone__, relatedPost_prefix):
+    return
+
+
+def field_mapping_check():
+    for field in field_check_list:
+        if field not in FIELD_NAME:
+            print("key missing in field mapping ")
+            return
+    return True
+
+
+def gql2rss(gql_endpoint: str, gql_string: str, schema_type:str, is_video:bool, relatedPost_prefix: str, rm_ytbiframe=False):
+    
+    feed_config = feed_config_mapping[PROJECT_NAME]
+    if field_mapping_check() is None:
+        return
+    __timezone__ = tz.gettz("Asia/Taipei")
+    gql_transport = AIOHTTPTransport(url=gql_endpoint)
+    gql_client = Client(transport=gql_transport,
+                        fetch_schema_from_transport=False)
+    query = gql(gql_string)
+    gql_result = gql_client.execute(query)
+    if is_video:
+        if 'videos' in gql_result and gql_result['videos']:
+            gql_data = gql_result['videos']
+            
+        else:
+            print('gql query failed')
+            return
+    else:
+        if 'posts' in gql_result and gql_result['posts']:
+            gql_data = gql_result['posts']
+        else:
+            print('gql query failed')
+            return
+    if schema_type == 'line':
+        return 
+    else:   
+        return gen_general_rss(gql_data, feed_config, __timezone__, relatedPost_prefix)
+
+    
+    
+    
+    
+    
+
 if __name__ == '__main__':
     relatedPost = '<br/><p class="read-more-vendor"><span>相關文章</span>'
     rm_ytbiframe = True
@@ -143,7 +168,7 @@ if __name__ == '__main__':
     dest_file = 'rss/standard_rss.xml'
 
     gql_endpoint = os.environ['GQL_ENDPOINT']
-    rss_data = gql2rss(gql_endpoint, gql_string, relatedPost)
+    rss_data = gql2rss(gql_endpoint, gql_string, 'general', False, relatedPost)
     with open(dest_file, 'w') as f:
         f.write(rss_data.decode())
         # upload_data(bucket, rss_data, 'application/xml', dest_file)
