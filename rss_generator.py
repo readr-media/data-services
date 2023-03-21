@@ -9,9 +9,11 @@ from gql.transport.aiohttp import AIOHTTPTransport
 import hashlib
 import re
 import os
+import json
 from utils.draft_converter import convert_draft_to_html
-from configs import field_name_mapping, feed_config_mapping
+from configs import feed_config_mapping
 PROJECT_NAME = os.environ['PROJECT_NAME']
+FIELD_NAME = json.loads(os.environ['FIELD_NAME_MAPPING']) 
 
 
 def gql2rss(gql_endpoint: str, gql_string: str, relatedPost_prefix: str, rm_ytbiframe=False):
@@ -28,7 +30,6 @@ def gql2rss(gql_endpoint: str, gql_string: str, relatedPost_prefix: str, rm_ytbi
     feed_config = feed_config_mapping[PROJECT_NAME]
     base_url = feed_config['baseURL']
     __timezone__ = tz.gettz("Asia/Taipei")
-    field_name = field_name_mapping[PROJECT_NAME]
     fg = FeedGenerator()
     fg.load_extension('media', atom=False, rss=True)
     fg.load_extension('dc', atom=False, rss=True)
@@ -44,16 +45,16 @@ def gql2rss(gql_endpoint: str, gql_string: str, relatedPost_prefix: str, rm_ytbi
     fg.ttl(300)
     fg.language('zh-TW')
     for post in posts:
-        slug = post[field_name['slug']]
+        slug = post[FIELD_NAME['slug']]
         guid = hashlib.sha224((base_url+slug).encode()).hexdigest()
         fe = fg.add_entry(order='append')
         fe.id(guid)
-        name = post[field_name['name']]
+        name = post[FIELD_NAME['name']]
         name = re.sub(escapse_char, '', name)
         fe.title(name)
         fe.link(href=base_url+slug, rel='alternate')
         fe.guid(guid)
-        publishedDate = post[field_name['publishedDate']]
+        publishedDate = post[FIELD_NAME['publishedDate']]
         if publishedDate is None:
             publishedDate = post['createdAt']
         fe.pubDate(util.formatRFC2822(parser.isoparse(publishedDate).astimezone(__timezone__)))
@@ -71,7 +72,7 @@ def gql2rss(gql_endpoint: str, gql_string: str, relatedPost_prefix: str, rm_ytbi
                 content += '<img src="%s" alt="%s" />' % (img, post['heroCaption'])
             else:
                 content += '<img src="%s" />' % (img)
-        brief = post[field_name['brief']]
+        brief = post[FIELD_NAME['brief']]
         if brief:
             brief = re.sub(escapse_char, '', convert_draft_to_html(brief))
             fe.description(description=brief, isSummary=True)
@@ -82,18 +83,18 @@ def gql2rss(gql_endpoint: str, gql_string: str, relatedPost_prefix: str, rm_ytbi
             if rm_ytbiframe:
                 contentHtml = re.sub('<iframe.*?src="https://www.youtube.com/embed.*?</iframe>', '', contentHtml)
             content += contentHtml
-        relateds = post[field_name['relatedPosts']]
+        relateds = post[FIELD_NAME['relatedPosts']]
         if len(relateds) > 0 and relatedPost_prefix:
             content += relatedPost_prefix
             for related_post in relateds[:3]:
-                related_slug = related_post[field_name['slug']]
-                related_name = post[field_name['name']]
+                related_slug = related_post[FIELD_NAME['slug']]
+                related_name = post[FIELD_NAME['name']]
                 content += '<br/><a href="%s">%s</a>' % (base_url + related_slug, related_name)
         content = re.sub(escapse_char, '', content)
         fe.content(content=content, type='CDATA')
-        categories = post[field_name['categories']]
+        categories = post[FIELD_NAME['categories']]
         fe.category(
-            list(map(lambda c: {'term': c[field_name['categories_name']], 'label': c[field_name['categories_name']]}, categories)))
+            list(map(lambda c: {'term': c[FIELD_NAME['categories_name']], 'label': c[FIELD_NAME['categories_name']]}, categories)))
         if 'writers' in post and post['writers']:
             fe.dc.dc_creator(creator=list(map(lambda w: w['name'], post['writers'])))
 
