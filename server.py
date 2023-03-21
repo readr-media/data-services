@@ -39,6 +39,6 @@ def generate_rss_from_k6():
 	if rss_data:
 		upload_data(bucket, rss_data, 'application/xml', dest_file)
 		return "ok"
-	return "gql query error"
+	return "fail"
 if __name__ == "__main__":
     app.run()

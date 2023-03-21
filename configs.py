@@ -1,4 +1,4 @@
-
+field_check_list = ["slug", "name", "publishedDate","brief", "relatedPosts", "categories", "categories_name"]
 feed_config_mapping = {
     "seinsights": {
         "baseURL": "https://www.seinsights.asia/article/",

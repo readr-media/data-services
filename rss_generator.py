@@ -11,9 +11,17 @@ import re
 import os
 import json
 from utils.draft_converter import convert_draft_to_html
-from configs import feed_config_mapping
+from configs import feed_config_mapping, field_check_list
 PROJECT_NAME = os.environ['PROJECT_NAME']
 FIELD_NAME = json.loads(os.environ['FIELD_NAME_MAPPING']) 
+
+ 
+def field_mapping_check():
+    for field in field_check_list:
+        if field not in FIELD_NAME:
+            print("key missing in field mapping ")
+            return
+    return True
 
 
 def gql2rss(gql_endpoint: str, gql_string: str, relatedPost_prefix: str, rm_ytbiframe=False):
@@ -26,8 +34,11 @@ def gql2rss(gql_endpoint: str, gql_string: str, relatedPost_prefix: str, rm_ytbi
     if 'posts' in gql_result and gql_result['posts']:
         posts = gql_result['posts']
     else:
-        return None
+        print('gql query failed')
+        return
     feed_config = feed_config_mapping[PROJECT_NAME]
+    if field_mapping_check() is None:
+        return
     base_url = feed_config['baseURL']
     __timezone__ = tz.gettz("Asia/Taipei")
     fg = FeedGenerator()
@@ -84,7 +95,7 @@ def gql2rss(gql_endpoint: str, gql_string: str, relatedPost_prefix: str, rm_ytbi
                 contentHtml = re.sub('<iframe.*?src="https://www.youtube.com/embed.*?</iframe>', '', contentHtml)
             content += contentHtml
         relateds = post[FIELD_NAME['relatedPosts']]
-        if len(relateds) > 0 and relatedPost_prefix:
+        if isinstance(relateds, list) and len(relateds) > 0 and relatedPost_prefix:
             content += relatedPost_prefix
             for related_post in relateds[:3]:
                 related_slug = related_post[FIELD_NAME['slug']]
