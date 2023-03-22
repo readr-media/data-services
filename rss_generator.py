@@ -1,9 +1,7 @@
-from datetime import datetime, timezone
 from dateutil import parser, tz
-# workaround as feegen raise error: AttributeError: module 'lxml' has no attribute 'etree'
-from lxml import etree
+import lxml.etree as ET
+from lxml.etree import Element
 from feedgen import util
-from feedgen.feed import FeedGenerator
 from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
 import hashlib
@@ -12,51 +10,57 @@ import os
 import json
 from utils.draft_converter import convert_draft_to_html
 from configs import feed_config_mapping, field_check_list
+from utils.rss_fmt_parser import recparse, sub
+
+
 PROJECT_NAME = os.environ['PROJECT_NAME']
-FIELD_NAME = json.loads(os.environ['FIELD_NAME_MAPPING']) 
+FIELD_NAME = json.loads(os.environ['FIELD_NAME_MAPPING'])
 escapse_char = u'[^\u0020-\uD7FF\u0009\u000A\u000D\uE000-\uFFFD\U00010000-\U0010FFFF]+'
 
 
-def gen_general_rss(data, feed_config, __timezone__, relatedPost_prefix):
+def gen_general_rss(posts, feed_config, __timezone__, relatedPost_prefix):
     base_url = feed_config['baseURL']
-    fg = FeedGenerator()
-    fg.load_extension('media', atom=False, rss=True)
-    fg.load_extension('dc', atom=False, rss=True)
-    fg.title(feed_config['title'])
-    fg.description(feed_config['description'])
-    fg.id(feed_config['link'])
-    fg.pubDate(datetime.now(timezone.utc).astimezone(__timezone__))
-    fg.updated(datetime.now(timezone.utc).astimezone(__timezone__))
-    fg.image(url=feed_config['image'],
-             title=feed_config['title'], link=feed_config['link'])
-    fg.rights(rights=feed_config['copyright'])
-    fg.link(href=feed_config['link'], rel='alternate')
-    fg.ttl(300)
-    fg.language('zh-TW')
-    for post in data:
+    nsmap_media = feed_config['media']
+    nsmap_dcterms = feed_config['dcterms']
+    nsmap_content = feed_config['content']
+    mainXML = {
+        "title": feed_config['title'],
+        "link": feed_config['link'],
+        "description": feed_config['description'],
+        "language": "zh-TW",
+        "copyright": feed_config['copyright'],
+        "image": {
+            "title": feed_config['title'],
+            "link": feed_config['link'],
+            "url": feed_config['image']
+        },
+        "ttl": 300,
+        "item": []
+    }
+    root = Element('rss', nsmap={'content': nsmap_content,
+                   'media': nsmap_media, 'dcterms': nsmap_dcterms}, version='2.0')
+    channel = sub(root, 'channel')
+
+    for post in posts:
         slug = post[FIELD_NAME['slug']]
         guid = hashlib.sha224((base_url+slug).encode()).hexdigest()
-        fe = fg.add_entry(order='append')
-        fe.id(guid)
         name = post[FIELD_NAME['name']]
         name = re.sub(escapse_char, '', name)
-        fe.title(name)
-        fe.link(href=base_url+slug, rel='alternate')
-        fe.guid(guid)
-        publishedDate = post[FIELD_NAME['publishedDate']]
-        if publishedDate is None:
-            publishedDate = post['createdAt']
-        fe.pubDate(util.formatRFC2822(parser.isoparse(publishedDate).astimezone(__timezone__)))
-        if post['updatedAt']:
-            fe.updated(util.formatRFC2822(parser.isoparse(post['updatedAt']).astimezone(__timezone__)))
-        else:
-            fe.updated(util.formatRFC2822(parser.isoparse(publishedDate).astimezone(__timezone__)))
+        publishedDate = post[FIELD_NAME['publishedDate']] if FIELD_NAME['publishedDate'] else post['createdAt']
+        updated = post['updatedAt'] if post['updatedAt'] else publishedDate
+
+        item = {
+            "id": guid,
+            "title": name,
+            "link": base_url+slug,
+            "pubDate": util.formatRFC2822(parser.isoparse(publishedDate).astimezone(__timezone__)),
+            "updated": util.formatRFC2822(parser.isoparse(updated).astimezone(__timezone__)),
+        }
         content = ''
-        # draft_to_html()
         if post['heroImage']:
             img = post['heroImage']['resized']['original']
-            fe.media.content(
-                content={'url': img, 'medium': 'image'}, group=None)
+            item["media:content"] = Element(_tag='{%s}content' % nsmap_media, nsmap={
+                                            'media': nsmap_media}, url=img, medium='image')
             if post['heroCaption']:
                 content += '<img src="%s" alt="%s" />' % (img, post['heroCaption'])
             else:
@@ -64,9 +68,8 @@ def gen_general_rss(data, feed_config, __timezone__, relatedPost_prefix):
         brief = post[FIELD_NAME['brief']]
         if brief:
             brief = re.sub(escapse_char, '', convert_draft_to_html(brief))
-            fe.description(description=brief, isSummary=True)
+            item["brief"] = brief
             content += brief
-
         if post['content']:
             contentHtml = convert_draft_to_html(post['content'])
             if rm_ytbiframe:
@@ -80,14 +83,15 @@ def gen_general_rss(data, feed_config, __timezone__, relatedPost_prefix):
                 related_name = post[FIELD_NAME['name']]
                 content += '<br/><a href="%s">%s</a>' % (base_url + related_slug, related_name)
         content = re.sub(escapse_char, '', content)
-        fe.content(content=content, type='CDATA')
+        item["content"] = content
         categories = post[FIELD_NAME['categories']]
-        fe.category(
-            list(map(lambda c: {'term': c[FIELD_NAME['categories_name']], 'label': c[FIELD_NAME['categories_name']]}, categories)))
+        item['category'] = list(c[FIELD_NAME['categories_name']]
+                                for c in categories)
         if 'writers' in post and post['writers']:
-            fe.dc.dc_creator(creator=list(map(lambda w: w['name'], post['writers'])))
-
-    return fg.rss_str(pretty=False, extensions=True, encoding='UTF-8', xml_declaration=True)
+            item["dc:creator"] = list(w['name'] for w in post['writers'])
+        mainXML['item'].append(item)
+    recparse(channel, mainXML)
+    return f'<?xml version="1.0" encoding="UTF-8" ?>{ET.tostring(root, encoding="unicode")}'
 
 
 def gen_line_rss(gql_data, feed_config, __timezone__, relatedPost_prefix):
@@ -102,8 +106,7 @@ def field_mapping_check():
     return True
 
 
-def gql2rss(gql_endpoint: str, gql_string: str, schema_type:str, is_video:bool, relatedPost_prefix: str, rm_ytbiframe=False):
-    
+def gql2rss(gql_endpoint: str, gql_string: str, schema_type: str, is_video: bool, relatedPost_prefix: str, rm_ytbiframe=False):
     feed_config = feed_config_mapping[PROJECT_NAME]
     if field_mapping_check() is None:
         return
@@ -116,7 +119,7 @@ def gql2rss(gql_endpoint: str, gql_string: str, schema_type:str, is_video:bool, 
     if is_video:
         if 'videos' in gql_result and gql_result['videos']:
             gql_data = gql_result['videos']
-            
+
         else:
             print('gql query failed')
             return
@@ -127,15 +130,11 @@ def gql2rss(gql_endpoint: str, gql_string: str, schema_type:str, is_video:bool, 
             print('gql query failed')
             return
     if schema_type == 'line':
-        return 
-    else:   
+        return gen_line_rss(gql_data, feed_config, __timezone__, relatedPost_prefix)
+
+    else:
         return gen_general_rss(gql_data, feed_config, __timezone__, relatedPost_prefix)
 
-    
-    
-    
-    
-    
 
 if __name__ == '__main__':
     relatedPost = '<br/><p class="read-more-vendor"><span>相關文章</span>'
@@ -166,9 +165,10 @@ if __name__ == '__main__':
         }
         }'''
     dest_file = 'rss/standard_rss.xml'
+    # dest_file = 'rss/line.xml'
 
     gql_endpoint = os.environ['GQL_ENDPOINT']
     rss_data = gql2rss(gql_endpoint, gql_string, 'general', False, relatedPost)
     with open(dest_file, 'w') as f:
-        f.write(rss_data.decode())
+        f.write(rss_data)
         # upload_data(bucket, rss_data, 'application/xml', dest_file)
