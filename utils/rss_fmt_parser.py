@@ -1,5 +1,15 @@
 from lxml.etree import CDATA
 import lxml.etree as ET
+from datetime import datetime
+from dateutil import parser
+import pytz
+
+
+def tsConverter(s):
+    timeorigin = parser.parse(s)
+    timediff = timeorigin - datetime(1970, 1, 1, tzinfo=pytz.utc)
+    return round(timediff.total_seconds() * 1000)
+
 
 def sub(parentItem, tag, content=None):
     element = ET.SubElement(parentItem, tag)
@@ -20,8 +30,11 @@ def recparse(parentItem, obj):
                 recparse(thisItem, value)
             elif subt is list:
                 for item in value:
-                    thisItem = ET.SubElement(parentItem, name)
-                    recparse(thisItem, item)
+                    if  type(item) is ET._Element:
+                        thisItem = parentItem.append(item)
+                    else:
+                        thisItem = ET.SubElement(parentItem, name)
+                        recparse(thisItem, item)
             elif subt is ET._Element:
                 thisItem = parentItem.append(value)
             elif subt is not str:
