@@ -34,12 +34,13 @@ def parse_post_line(post, relatedPost_prefix: str = '', is_video: bool = False, 
         'publishTimeUnix': tsConverter(publishedDate),
         'updateTimeUnix': tsConverter(updated),
         'contentType': 0,
+        'contents': {}
         
     }
 
     content = ''
     relatedPost_html = ''
-    contentHtml = ''
+    content_html = ''
 
     if is_video:
         video_url = post['urlOriginal'] if post['urlOriginal'] else post['file']['url']
@@ -49,13 +50,13 @@ def parse_post_line(post, relatedPost_prefix: str = '', is_video: bool = False, 
         })
         post_content = post.get('content', '')
         if post_content:
-            contentHtml = convert_draft_to_html(post['content'])
+            content_html = convert_draft_to_html(post_content)
             if rm_ytbiframe:
-                contentHtml = re.sub(
-                    '<iframe.*?src="https://www.youtube.com/embed.*?</iframe>', '', contentHtml)
+                content_html = re.sub(
+                    '<iframe.*?src="https://www.youtube.com/embed.*?</iframe>', '', content_html)
 
-        relateds = post.get(FIELD_NAME['relatedPosts'], [])
-        if relatedPost_prefix and isinstance(relateds, list) and len(relateds) > 0:
+        related_posts = post.get(FIELD_NAME['relatedPosts'], [])
+        if relatedPost_prefix and isinstance(related_posts, list) and len(related_posts) > 0:
             related_posts = related_posts[:3]
     else:
         categories, hero_image, hero_caption, brief, content_html, related_posts = parse_field(
