@@ -28,7 +28,7 @@ feed_config_mapping = {
         "copyright": "Copyright2019-2023",
         "image": "https://www.mirrormedia.com.tw/assets/images/logo.png",
         "officialLine": "",
-        "utmSource": "?utm_medium=%s&utm_source=feed_related",
+        "utmSource": "?utm_medium=%s&utm_source=feed_relate_%s",
     },
     "mnews": {
 
