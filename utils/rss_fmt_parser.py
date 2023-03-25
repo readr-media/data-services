@@ -1,8 +1,23 @@
-from lxml.etree import CDATA
+import os
+import re
+import json
+import pytz
 import lxml.etree as ET
 from datetime import datetime
 from dateutil import parser
-import pytz
+from lxml.etree import CDATA, Element
+from utils.draft_converter import convert_draft_to_html
+
+escapse_char = u'[^\u0020-\uD7FF\u0009\u000A\u000D\uE000-\uFFFD\U00010000-\U0010FFFF]+'
+PROJECT_NAME = os.environ['PROJECT_NAME']
+FIELD_NAME = json.loads(os.environ['FIELD_NAME_MAPPING'])
+
+
+def parse_writer(writer, nsmap_dcterms):
+    creator = Element(_tag='{%s}creator' % nsmap_dcterms, nsmap={
+        'creator': nsmap_dcterms})
+    creator.text = stringWrapper('author', writer['name'])
+    return creator
 
 
 def tsConverter(s):
@@ -17,7 +32,7 @@ def sub(parentItem, tag, content=None):
         element.text = stringWrapper(tag, content)
     return element
 
-    
+
 # Can not accept structure contains 'array of array'
 def recparse(parentItem, obj):
     t = type(obj)
@@ -30,7 +45,7 @@ def recparse(parentItem, obj):
                 recparse(thisItem, value)
             elif subt is list:
                 for item in value:
-                    if  type(item) is ET._Element:
+                    if type(item) is ET._Element:
                         thisItem = parentItem.append(item)
                     else:
                         thisItem = ET.SubElement(parentItem, name)
@@ -55,3 +70,37 @@ def stringWrapper(name, s):
         return CDATA(s)
     else:
         return s
+
+
+def parse_basic_field(post):
+    slug = post.get(FIELD_NAME['slug'], FIELD_NAME['video_slug'])
+    name = post.get(FIELD_NAME['name'], FIELD_NAME['video_name'])
+    name = re.sub(escapse_char, '', name)
+    publishedDate = post[FIELD_NAME['publishedDate']
+                         ] if FIELD_NAME['publishedDate'] else post['createdAt']
+    updated = post.get('updatedAt', publishedDate)
+    return slug, name, publishedDate, updated
+
+
+def parse_field(post, rm_ytbiframe, relatedPost_prefix):
+    categories = post.get(FIELD_NAME['categories'], [])
+    hero_image = post.get('heroImage', None)
+    hero_caption = post.get('heroCaption', None)
+    
+    brief = post.get(FIELD_NAME['brief'], '')
+    if brief:
+        brief = re.sub(escapse_char, '', convert_draft_to_html(brief))
+    
+    post_content = post.get('content', '')
+    content_html = ''
+    if post_content:
+        content_html = convert_draft_to_html(post_content)
+        if rm_ytbiframe:
+            content_html = re.sub(
+                '<iframe.*?src="https://www.youtube.com/embed.*?</iframe>', '', content_html)
+
+    related_posts = post.get(FIELD_NAME['relatedPosts'], [])
+    if relatedPost_prefix and isinstance(related_posts, list) and len(related_posts) > 0:
+        related_posts = related_posts[:3]
+    
+    return categories, hero_image, hero_caption, brief, content_html, related_posts
