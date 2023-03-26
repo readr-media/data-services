@@ -35,3 +35,5 @@ feed_config_mapping = {
     }
 
 }
+
+escapse_char = u'[^\u0020-\uD7FF\u0009\u000A\u000D\uE000-\uFFFD\U00010000-\U0010FFFF]+'

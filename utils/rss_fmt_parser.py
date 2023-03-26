@@ -7,8 +7,8 @@ from datetime import datetime
 from dateutil import parser
 from lxml.etree import CDATA, Element
 from utils.draft_converter import convert_draft_to_html
+from configs import escapse_char
 
-escapse_char = u'[^\u0020-\uD7FF\u0009\u000A\u000D\uE000-\uFFFD\U00010000-\U0010FFFF]+'
 PROJECT_NAME = os.environ['PROJECT_NAME']
 FIELD_NAME = json.loads(os.environ['FIELD_NAME_MAPPING'])
 

@@ -5,12 +5,11 @@ from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
 from rss_general import gen_general_rss
 from rss_line import gen_line_rss
-from configs import field_check_list
+from configs import field_check_list, escapse_char
 
 
 PROJECT_NAME = os.environ['PROJECT_NAME']
 FIELD_NAME = json.loads(os.environ['FIELD_NAME_MAPPING'])
-escapse_char = u'[^\u0020-\uD7FF\u0009\u000A\u000D\uE000-\uFFFD\U00010000-\U0010FFFF]+'
 
 
 def field_mapping_check():
