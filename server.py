@@ -36,7 +36,8 @@ def generate_rss_from_k6():
 	dest_file = request.args.get('dest_file')
 	relatedPost = request.args.get('relatedPost')
 	rm_ytbiframe = request.args.get('rm_ytbiframe')
-	rss_data = gql2rss(gql_endpoint, gql_string, schema_type, relatedPost, rm_ytbiframe)
+	relatedPost_number = request.args.get('relatedPost_number')
+	rss_data = gql2rss(gql_endpoint, gql_string, schema_type, relatedPost, rm_ytbiframe, relatedPost_number)
 	if rss_data:
 		upload_data(bucket, rss_data, 'application/xml', dest_file)
 		return "ok"

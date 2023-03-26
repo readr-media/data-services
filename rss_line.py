@@ -19,7 +19,7 @@ feed_config = feed_config_mapping[PROJECT_NAME]
 base_url = feed_config['baseURL']
 
 
-def parse_post_line(post, relatedPost_prefix: str = '', is_video: bool = False, rm_ytbiframe: str = '', ):
+def parse_post_line(post, relatedPost_prefix: str, is_video: bool, rm_ytbiframe: str, relatedPost_number: int):
     slug, name, publishedDate, updated = parse_basic_field(post)
     availableDate = max(tsConverter(publishedDate), tsConverter(updated))
 
@@ -57,10 +57,10 @@ def parse_post_line(post, relatedPost_prefix: str = '', is_video: bool = False, 
 
         related_posts = post.get(FIELD_NAME['relatedPosts'], [])
         if relatedPost_prefix and isinstance(related_posts, list) and len(related_posts) > 0:
-            related_posts = related_posts[:3]
+            related_posts = related_posts[:relatedPost_number]
     else:
         categories, hero_image, hero_caption, brief, content_html, related_posts = parse_field(
-            post, rm_ytbiframe, relatedPost_prefix)
+            post, rm_ytbiframe, relatedPost_prefix, relatedPost_number)
         item['category'] = categories[0][FIELD_NAME['categories_name']] if len(
             categories) > 0 else []
         item['sourceUrl'] = base_url + slug + \
@@ -113,12 +113,12 @@ def parse_post_line(post, relatedPost_prefix: str = '', is_video: bool = False, 
     return item
 
 
-def gen_line_rss(posts, relatedPost_prefix: str = '', is_video: bool = False, rm_ytbiframe: str = ''):
+def gen_line_rss(posts, relatedPost_prefix: str, is_video: bool = False, rm_ytbiframe: str = '', relatedPost_number: int = 3):
 
     mainXML = {
         'UUID': str(uuid.uuid4()),
         'time': int(round(time.time() * 1000)),
-        'article': [parse_post_line(post, relatedPost_prefix, is_video, rm_ytbiframe) for post in posts]
+        'article': [parse_post_line(post, relatedPost_prefix, is_video, rm_ytbiframe, relatedPost_number) for post in posts]
     }
     root = Element('articles')
     recparse(root, mainXML)

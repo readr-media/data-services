@@ -24,7 +24,7 @@ nsmap_content = feed_config['content']
 title = feed_config['title']
 
 
-def parse_post_genral(post, relatedPost_prefix: str = '', is_video: bool = False, rm_ytbiframe: str = '' ):
+def parse_post_genral(post, relatedPost_prefix: str = '', is_video: bool = False, rm_ytbiframe: str = '',  relatedPost_number:int=3):
     slug, name, publishedDate, updated = parse_basic_field(post)
     item = {
             "guid": hashlib.sha224((base_url+slug).encode()).hexdigest(),
@@ -51,7 +51,7 @@ def parse_post_genral(post, relatedPost_prefix: str = '', is_video: bool = False
         })
         item["media:credit"].text = stringWrapper('author', title)
     else:
-        categories, hero_image, hero_caption, brief, content_html, related_posts = parse_field(post, rm_ytbiframe, relatedPost_prefix)
+        categories, hero_image, hero_caption, brief, content_html, related_posts = parse_field(post, rm_ytbiframe, relatedPost_prefix, relatedPost_number)
         
         item['category'] = list(c[FIELD_NAME['categories_name']]for c in categories)
 
@@ -87,7 +87,7 @@ def parse_post_genral(post, relatedPost_prefix: str = '', is_video: bool = False
     return item
 
 
-def gen_general_rss(posts, relatedPost_prefix, is_video: bool, rm_ytbiframe: bool= True):
+def gen_general_rss(posts, relatedPost_prefix, is_video: bool, rm_ytbiframe: bool= True, relatedPost_number: int = 3):
     
     mainXML = {
         "title": feed_config['title'],
@@ -101,7 +101,7 @@ def gen_general_rss(posts, relatedPost_prefix, is_video: bool, rm_ytbiframe: boo
             "url": feed_config['image']
         },
         "ttl": 300,
-        "item": [parse_post_genral(post, relatedPost_prefix, is_video, rm_ytbiframe) for post in posts]
+        "item": [parse_post_genral(post, relatedPost_prefix, is_video, rm_ytbiframe, relatedPost_number) for post in posts]
     }
     root = Element('rss', nsmap={'content': nsmap_content,
                    'media': nsmap_media, 'dcterms': nsmap_dcterms}, version='2.0')

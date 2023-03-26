@@ -82,7 +82,7 @@ def parse_basic_field(post):
     return slug, name, publishedDate, updated
 
 
-def parse_field(post, rm_ytbiframe, relatedPost_prefix):
+def parse_field(post, rm_ytbiframe, relatedPost_prefix, relatedPost_number:int):
     categories = post.get(FIELD_NAME['categories'], [])
     hero_image = post.get('heroImage', None)
     hero_caption = post.get('heroCaption', None)
@@ -101,7 +101,7 @@ def parse_field(post, rm_ytbiframe, relatedPost_prefix):
 
     related_posts = post.get(FIELD_NAME['relatedPosts'], [])
     if relatedPost_prefix and isinstance(related_posts, list) and len(related_posts) > 0:
-        related_posts = related_posts[:3]
+        related_posts = related_posts[:relatedPost_number]
     else:
         related_posts = []
     return categories, hero_image, hero_caption, brief, content_html, related_posts

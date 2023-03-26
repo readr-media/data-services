@@ -21,7 +21,7 @@ def field_mapping_check():
     return True
 
 
-def gql2rss(gql_endpoint: str, gql_string: str, schema_type: str, relatedPost_prefix: str, rm_ytbiframe=False):
+def gql2rss(gql_endpoint: str, gql_string: str, schema_type: str, relatedPost_prefix: str = '', rm_ytbiframe: bool = False, relatedPost_number: int = 3):
     if field_mapping_check() is None:
         return
     
@@ -42,8 +42,8 @@ def gql2rss(gql_endpoint: str, gql_string: str, schema_type: str, relatedPost_pr
         return
 
     if schema_type == 'line':
-        return gen_line_rss(gql_data, relatedPost_prefix, is_video, rm_ytbiframe)
-    return gen_general_rss(gql_data, relatedPost_prefix, is_video, rm_ytbiframe)
+        return gen_line_rss(gql_data, relatedPost_prefix, is_video, rm_ytbiframe, relatedPost_number)
+    return gen_general_rss(gql_data, relatedPost_prefix, is_video, rm_ytbiframe, relatedPost_number)
 
 
 if __name__ == '__main__':
@@ -110,13 +110,14 @@ if __name__ == '__main__':
     updatedAt
   }
 }'''
+    relatedPost_number = None
     dest_file = 'rss/mm_standard_rss_video.xml'
     # dest_file = 'rss/mm_standard_rss.xml'
     # dest_file = 'rss/mm_line.xml'
     # dest_file = 'rss/mm_line_video.xml'
-    relatedPost=''
+    relatedPost='相關文章'
     gql_endpoint = os.environ['GQL_ENDPOINT']
-    rss_data = gql2rss(gql_endpoint, gql_string, 'general', relatedPost)
+    rss_data = gql2rss(gql_endpoint, gql_string, 'general', relatedPost, relatedPost_number)
     with open(dest_file, 'w') as f:
         f.write(rss_data)
         # upload_data(bucket, rss_data, 'application/xml', dest_file)
