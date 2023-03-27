@@ -23,7 +23,8 @@ def field_mapping_check():
 def gql2rss(gql_endpoint: str, gql_string: str, schema_type: str, relatedPost_prefix: str = '', rm_ytbiframe: bool = False, relatedPost_number: int = 3):
     if field_mapping_check() is None:
         return
-    
+    if relatedPost_number:
+        relatedPost_number = int(relatedPost_number)
     gql_transport = AIOHTTPTransport(url=gql_endpoint)
     gql_client = Client(transport=gql_transport,
                         fetch_schema_from_transport=False)
