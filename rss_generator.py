@@ -5,11 +5,13 @@ from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
 from rss_general import gen_general_rss
 from rss_line import gen_line_rss
-from configs import escapse_char
+from configs import escapse_char, feed_config_check_list
 
 
 FIELD_NAME = json.loads(os.environ['FIELD_NAME_MAPPING'])
 FIELD_CHECK_LIST = json.loads(os.environ['FIELD_CHECK_LIST'])
+FEED_CONFIG_MAPPING = json.loads(os.environ['FEED_CONFIG_MAPPING'])
+
 
 def field_mapping_check():
     for field in FIELD_CHECK_LIST:
@@ -19,7 +21,16 @@ def field_mapping_check():
     return True
 
 
+def feed_configs_check():
+    for feed_config in feed_config_check_list:
+        if feed_config not in FEED_CONFIG_MAPPING :
+            print("key missing in feed config ")
+            return
+    return True
+
 def gql2rss(gql_endpoint: str, gql_string: str, schema_type: str, relatedPost_prefix: str = '', rm_ytbiframe: bool = False, relatedPost_number: int = 3):
+    if field_mapping_check() is None:
+        return
     if field_mapping_check() is None:
         return
     if relatedPost_number:
