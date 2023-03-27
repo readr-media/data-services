@@ -5,15 +5,15 @@ from gql import gql, Client
 from gql.transport.aiohttp import AIOHTTPTransport
 from rss_general import gen_general_rss
 from rss_line import gen_line_rss
-from configs import field_check_list, escapse_char
+from configs import escapse_char
 
 
 PROJECT_NAME = os.environ['PROJECT_NAME']
 FIELD_NAME = json.loads(os.environ['FIELD_NAME_MAPPING'])
-
+FIELD_CHECK_LIST = json.loads(os.environ['FIELD_CHECK_LIST'])
 
 def field_mapping_check():
-    for field in field_check_list:
+    for field in FIELD_CHECK_LIST:
         if field not in FIELD_NAME:
             print("key missing in field mapping ")
             return

@@ -1,5 +1,3 @@
-field_check_list = ["slug", "name", "publishedDate",
-                    "brief", "relatedPosts", "categories", "categories_name"]
 feed_config_mapping = {
     "seinsights": {
         "media": "http://search.yahoo.com/mrss/",
