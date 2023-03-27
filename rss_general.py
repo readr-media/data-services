@@ -9,13 +9,13 @@ import os
 import json
 from utils.draft_converter import convert_draft_to_html
 from utils.rss_fmt_parser import recparse, sub, stringWrapper, parse_writer, parse_basic_field, parse_field
-from configs import feed_config_mapping, escapse_char
+from configs import feed_config, escapse_char
 
 
-PROJECT_NAME = os.environ['PROJECT_NAME']
 FIELD_NAME = json.loads(os.environ['FIELD_NAME_MAPPING'])
+FEED_CONFIG_MAPPING = json.loads(os.environ['FEED_CONFIG_MAPPING'])
 timezone = tz.gettz("Asia/Taipei")
-feed_config = feed_config_mapping[PROJECT_NAME]
+feed_config.update(FEED_CONFIG_MAPPING)
 base_url = feed_config['baseURL']
 nsmap_media = feed_config['media']
 nsmap_dcterms = feed_config['dcterms']

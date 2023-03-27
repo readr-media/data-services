@@ -8,13 +8,13 @@ from lxml.etree import Element
 from datetime import timedelta
 from utils.draft_converter import convert_draft_to_html
 from utils.rss_fmt_parser import recparse, tsConverter, parse_basic_field, parse_field
-from configs import feed_config_mapping, escapse_char
+from configs import feed_config, escapse_char
 
 
-PROJECT_NAME = os.environ['PROJECT_NAME']
 FIELD_NAME = json.loads(os.environ['FIELD_NAME_MAPPING'])
+FEED_CONFIG_MAPPING = json.loads(os.environ['FEED_CONFIG_MAPPING'])
 news_available_days = 365
-feed_config = feed_config_mapping[PROJECT_NAME]
+feed_config.update(FEED_CONFIG_MAPPING)
 base_url = feed_config['baseURL']
 
 

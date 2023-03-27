@@ -8,7 +8,6 @@ from rss_line import gen_line_rss
 from configs import escapse_char
 
 
-PROJECT_NAME = os.environ['PROJECT_NAME']
 FIELD_NAME = json.loads(os.environ['FIELD_NAME_MAPPING'])
 FIELD_CHECK_LIST = json.loads(os.environ['FIELD_CHECK_LIST'])
 
