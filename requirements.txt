@@ -16,3 +16,8 @@ google-cloud-appengine-logging==1.1.0
 google-cloud-audit-log==0.2.0
 google-cloud-core==2.2.2
 google-cloud-datastore==2.9.0
+python-dateutil==2.8.2
+pytz==2022.1
+feedgen==0.9.0
+feedparser==6.0.8
+draftjs-exporter==5.0.0

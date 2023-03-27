@@ -1,8 +1,7 @@
-from dateutil import parser
+from dateutil import parser,tz
 import lxml.etree as ET
 from lxml.etree import Element
 from feedgen import util
-from dateutil import tz
 import hashlib
 import re
 import os
