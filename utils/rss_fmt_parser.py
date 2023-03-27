@@ -85,6 +85,12 @@ def parse_basic_field(post):
 def parse_field(post, rm_ytbiframe, relatedPost_prefix, relatedPost_number:int):
     categories = post.get(FIELD_NAME['categories'], [])
     hero_image = post.get('heroImage', None)
+    if hero_image and hero_image.get('resize', None) and hero_image['resize'].get('original', None):
+        pass
+    elif 'urlOriginal' in hero_image and hero_image['urlOriginal']:
+        hero_image['resize']['original'] = hero_image['urlOriginal']
+    else:
+        hero_image = None
     hero_caption = post.get('heroCaption', None)
     
     brief = post.get(FIELD_NAME['brief'], '')
