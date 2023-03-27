@@ -6,16 +6,18 @@ from draftjs_exporter.html import HTML
 
 def image(props):
     # This component creates an image element, with the relevant attributes.
+    figure = DOM.create_element('figure', {'class': 'image'})
     try:
-        return DOM.create_element('img', {
-            'src': props.get('resized').get('original'),
-            'alt': props.get('desc'),
-        })
+        img = DOM.create_element('img', {'src': props.get('resized').get('original'),
+                                         'alt': props.get('desc')})
     except AttributeError:
-        return DOM.create_element('img', {
-            'src': props.get('src'),
-            'alt': props.get('desc'),
-        })
+        img = DOM.create_element('img', {'src': props.get('src'),
+                                         'alt': props.get('desc')})
+    figcaption = DOM.create_element(
+        'figcaption', {'class': 'image'}, props.get('desc'))
+    DOM.append_child(figure, img)
+    DOM.append_child(figure, figcaption)
+    return figure
 
 
 def link(props):
