@@ -72,9 +72,13 @@ def stringWrapper(name, s):
         return s
 
 
-def parse_basic_field(post):
-    slug = post.get(FIELD_NAME['slug'], FIELD_NAME['video_slug'])
-    name = post.get(FIELD_NAME['name'], FIELD_NAME['video_name'])
+def parse_basic_field(post, is_video):
+    if is_video:
+        slug = post.get(FIELD_NAME['video_slug'])
+        name = post.get(FIELD_NAME['video_name'])
+    else:
+        slug = post.get(FIELD_NAME['slug'])
+        name = post.get(FIELD_NAME['name'])
     name = re.sub(escapse_char, '', name)
     publishedDate = post[FIELD_NAME['publishedDate']
                          ] if FIELD_NAME['publishedDate'] else post['createdAt']

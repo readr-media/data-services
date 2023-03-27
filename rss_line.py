@@ -19,7 +19,7 @@ base_url = feed_config['baseURL']
 
 
 def parse_post_line(post, relatedPost_prefix: str, is_video: bool, rm_ytbiframe: str, relatedPost_number: int):
-    slug, name, publishedDate, updated = parse_basic_field(post)
+    slug, name, publishedDate, updated = parse_basic_field(post, is_video)
     availableDate = max(tsConverter(publishedDate), tsConverter(updated))
 
     item = {

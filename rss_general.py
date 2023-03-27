@@ -23,7 +23,7 @@ title = feed_config['title']
 
 
 def parse_post_genral(post, relatedPost_prefix: str = '', is_video: bool = False, rm_ytbiframe: str = '',  relatedPost_number:int=3):
-    slug, name, publishedDate, updated = parse_basic_field(post)
+    slug, name, publishedDate, updated = parse_basic_field(post, is_video)
     item = {
             "guid": hashlib.sha224((base_url+slug).encode()).hexdigest(),
             "title": name,
