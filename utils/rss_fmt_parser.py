@@ -67,12 +67,17 @@ def recparse(parentItem, obj):
 
 
 def stringWrapper(name, s):
+    print(name)
+    print(s)
     if name in ['title', 'content', 'author', 'writer', 'brief']:
         try:
             return CDATA(s)
         except UnicodeEncodeError:
             print(type(s))
-            print(s.encode('utf-8', 'surrogateescape').decode('utf-8'))
+            s = s.encode('utf-8', 'surrogateescape')
+            print(s)
+            s = s.decode('utf-8', 'surrogateescape')
+            print(s)
             return f"<![CDATA[{s}]]>"
     else:
         return s
