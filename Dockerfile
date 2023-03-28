@@ -10,7 +10,7 @@ RUN apt-get update \
     && pip install --upgrade pip \
     && pip install -r requirements.txt
 
-ENV LC_ALL="en_US.utf8"
+# ENV LC_ALL="en_US.utf8" 
 
 EXPOSE 8080
-CMD ["env", "LC_ALL='en_US.utf-8'", "/usr/local/bin/uwsgi", "--ini", "server.ini"]
+CMD [ "/usr/local/bin/uwsgi", "--ini", "server.ini"]
