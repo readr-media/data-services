@@ -71,7 +71,7 @@ def stringWrapper(name, s):
         try:
             return CDATA(s)
         except UnicodeEncodeError:
-            print(s)
+            print(s.encode('utf-8'))
             return f"<![CDATA[{s}]]>"
     else:
         return s
