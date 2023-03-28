@@ -68,7 +68,10 @@ def recparse(parentItem, obj):
 
 def stringWrapper(name, s):
     print(name)
+    s = s.encode('utf-8', 'surrogateescape')
     print(s)
+    if name == 'content':
+        print('content')
     if name in ['title', 'content', 'author', 'writer', 'brief']:
         try:
             return CDATA(s)
