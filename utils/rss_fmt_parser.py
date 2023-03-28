@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 import re
 import json
@@ -70,7 +71,7 @@ def stringWrapper(name, s):
         try:
             return CDATA(s)
         except UnicodeEncodeError:
-            # print(s.encode('ascii'))
+            print(s)
             return f"<![CDATA[{s}]]>"
     else:
         return s
