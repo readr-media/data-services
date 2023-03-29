@@ -63,10 +63,14 @@ def upload_data(bucket_name: str, data: str, content_type: str, destination_blob
     bucket = storage_client.bucket(bucket_name)
     blob = bucket.blob(destination_blob_name)
     # blob.content_encoding = 'gzip'
-    blob.upload_from_string(
-        # data=gzip.compress(data=data, compresslevel=9),
-        data=bytes(data, encoding='utf-8'),
-        content_type=content_type, client=storage_client)
+    try:
+        blob.upload_from_string(
+            # data=gzip.compress(data=data, compresslevel=9),
+            #data=bytes(data, encoding='utf-8'),
+            data=bytes(data, encoding='utf-8'),
+            content_type=content_type, client=storage_client)
+    except:
+        print(data)
     blob.content_language = 'zh'
     blob.cache_control = 'max-age=300,public'
     blob.patch()
