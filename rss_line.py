@@ -61,7 +61,7 @@ def parse_post_line(post, relatedPost_prefix: str, is_video: bool, rm_ytbiframe:
         categories, hero_image, hero_caption, brief, content_html, related_posts = parse_field(
             post, rm_ytbiframe, relatedPost_prefix, relatedPost_number)
         item['category'] = categories[0][FIELD_NAME['categories_name']] if len(
-            categories) > 0 else []
+            categories) > 0 else ['不分類'] #category is a required tag
         item['sourceUrl'] = base_url + slug + \
             feed_config['utmSource'] % ('line', slug)
 
