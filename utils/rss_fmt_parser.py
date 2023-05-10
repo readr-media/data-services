@@ -92,14 +92,14 @@ def parse_basic_field(post, is_video):
         name = post.get(FIELD_NAME['name'])
     name = re.sub(escapse_char, '', name)
     publishedDate = post[FIELD_NAME['publishedDate']
-                         ] if FIELD_NAME['publishedDate'] else post['createdAt']
+                         ] if post[FIELD_NAME['publishedDate']] else post['createdAt']
     updated = post.get('updatedAt', publishedDate)
     if updated is None:
         updated = publishedDate
     return slug, name, publishedDate, updated
 
 
-def parse_field(post, rm_ytbiframe, relatedPost_prefix, relatedPost_number:int):
+def parse_field(post, rm_ytbiframe, relatedPost_prefix, relatedPost_number: int):
     categories = post.get(FIELD_NAME['categories'], [])
     hero_image = post.get('heroImage', None)
     if hero_image:
@@ -109,11 +109,11 @@ def parse_field(post, rm_ytbiframe, relatedPost_prefix, relatedPost_number:int):
             hero_image['resize']['original'] = hero_image['urlOriginal']
 
     hero_caption = post.get('heroCaption', None)
-    
+
     brief = post.get(FIELD_NAME['brief'], '')
     if brief:
         brief = re.sub(escapse_char, '', convert_draft_to_html(brief))
-    
+
     post_content = post.get('content', '')
     content_html = ''
     if post_content:
