@@ -1,6 +1,7 @@
 from flask import Flask, request
 from data_export import sheet2json, gql2json, upload_data
 from rss_generator import gql2rss
+from scheduled_update import status_update
 import os
 import json
 
@@ -27,6 +28,10 @@ def generate_json_from_sheet():
 	upload_data(bucket, json.dumps(json_data, ensure_ascii=False).encode('utf8'), 'application/json', dest_file)
 	return "ok"
     
+@app.route("/cron_update")
+def scheduled_publish():
+    return_message = status_update()
+    return return_message
 
 @app.route("/k6_to_rss")
 def generate_rss_from_k6():
