@@ -13,7 +13,7 @@ def status_update():
     cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     current_time = datetime.utcnow().strftime("%Y/%m/%d %H:%M:%S")
 
-    update_post = """UPDATE "Post" SET "status" = 'published', "updatedAt" = '%s' WHERE "status" = 'scheduled' AND "publishDate" < '%s'""" % (current_time, current_time)
+    update_post = """UPDATE "Post" SET "state" = 'published', "updatedAt" = '%s' WHERE "state" = 'scheduled' AND "publishTime" < '%s'""" % (current_time, current_time)
     print(update_post)
     cursor.execute(update_post)
     connection.commit()
