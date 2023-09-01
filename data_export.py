@@ -28,7 +28,7 @@ def sheet2json( url, sheet ):
 
         field_names = [field_name for field_name in meta_data[0] if field_name != '']
         all_rows = []
-        if sheet_title in {'Page Info', 'Partners'}:
+        if sheet_title.lower() in {'pageinfo', 'partners'}:
             all_rows = {}
         
         for i in range(1, len(meta_data)):
