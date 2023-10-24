@@ -99,7 +99,6 @@ query GetPresidents
     }
 }""" % (category)
         data_endpoint = DATA_SERVICE + '/gql_to_json?bucket=' + WHORU_BUCKET + '&dest_file=files/json/president_' + category + '.json&gql_string=' + gql_string
-        print(data_endpoint)
         r = requests.get(data_endpoint) 
     return "ok"
 
