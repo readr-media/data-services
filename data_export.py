@@ -87,12 +87,6 @@ def upload_data(bucket_name: str, data: str, content_type: str, destination_blob
     blob.cache_control = 'max-age=300,public'
     blob.patch()
 
-def president_factcheck():
-	categories = ('交通')
-	for category in categories:
-	gql_string = ''' query GetPresidents { personElections( orderBy:{ number: asc }, where: { election: {type: { equals: "總統" }, election_year_year: { equals: 2024 } }, mainCandidate: null }) { id number person_id { id name } politicsCount( where: { status: { equals: "verified" }, reviewed: { equals: true } }) politics( where: { status: { equals: "verified" }, reviewed: { equals: true } politicCategory: { name: { equals: '%s' } } }) { id content politicCategory { id name } positionChange { id isChanged factcheckPartner { id name } } positionChangeCount expertPoint { id expertPointSummary expert } expertPointCount factCheck { id factCheckSummary checkResultType factcheckPartner { id name } } factCheckCount repeat { id repeatSummary factcheckPartner { id name } } repeatCount } } }''' % (category)
-	data_endpoint = DATA_SERVICE + '/gql_to_json?bucket=' + WHORU_BUCKET + '&dest_file=files/json/president_' + category + '.json&gql_string=' + gql_string
-	r = requests.get(data_endpoint) 
 if __name__ == "__main__":  
     gql_string = """
 query { allPosts(where: { tags_every: {name_in: "疫苗"}, state: published }, orderBy: "publishTime_DESC", first: 3) {
