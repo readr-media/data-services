@@ -14,7 +14,7 @@ def election2024():
     #db_port = os.environ['DATABASE_PORT']
     db = 'openrelationship'
     db_user = 'openrelation'
-    db_pw = 'k),F:>T1+oBVgl9n'
+    db_pw = ''
     db_host = '35.234.56.9'
     db_port = 5432
     election_id = 85
@@ -33,8 +33,9 @@ SELECT "Politic"."person", "Politic"."politicCategory", count(*) FROM "Politic",
         print(politic[0], politic[1], politic[2])
     return "ok"
 
+
 def president_factcheck():
-	categories = ('交通')
+	categories = ['交通']
 	for category in categories:
         gql_string = ''' query GetPresidents { personElections( orderBy:{ number: asc }, where: { election: {type: { equals: "總統" }, election_year_year: { equals: 2024 } }, mainCandidate: null }) { id number person_id { id name } politicsCount( where: { status: { equals: "verified" }, reviewed: { equals: true } }) politics( where: { status: { equals: "verified" }, reviewed: { equals: true } politicCategory: { name: { equals: '%s' } } }) { id content politicCategory { id name } positionChange { id isChanged factcheckPartner { id name } } positionChangeCount expertPoint { id expertPointSummary expert } expertPointCount factCheck { id factCheckSummary checkResultType factcheckPartner { id name } } factCheckCount repeat { id repeatSummary factcheckPartner { id name } } repeatCount } } }''' % (category)
         data_endpoint = DATA_SERVICE + '/gql_to_json?bucket=' + WHORU_BUCKET + '&dest_file=files/json/president_' + category + '.json&gql_string=' + gql_string
