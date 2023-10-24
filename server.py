@@ -1,8 +1,8 @@
 from flask import Flask, request
-from data_export import sheet2json, gql2json, upload_data
+from data_export import sheet2json, gql2json, upload_data, president_factcheck
 from rss_generator import gql2rss
 from scheduled_update import status_update
-from election import president_factcheck
+#from election import president_factcheck
 import os
 import json
 
