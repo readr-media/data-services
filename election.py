@@ -39,7 +39,8 @@ def factcheck_data():
     categories = ['交通']
     DATA_SERVICE = os.environ['DATA_SERVICE']
     WHORU_BUCKET = os.environ['WHORU_BUCKET']
-    gql_endpoint = os.environ['GQL_ENDPOINT']
+    #gql_endpoint = os.environ['GQL_ENDPOINT']
+    gql_endpoint = 'https://openrelationship-gql-dev-4g6paft7cq-de.a.run.app/api/graphql'
     for category in categories:
         gql_string = """
 query GetPresidents 
