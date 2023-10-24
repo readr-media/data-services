@@ -16,4 +16,4 @@ ENV PYTHONIOENCODING=utf8
 
 
 EXPOSE 8080
-CMD [ "env", "LC_ALL='en_US.utf-8'", "/usr/local/bin/uwsgi", "--ini", "server.ini", "--module", "wsgi", "--callable", "app"]
+CMD [ "env", "LC_ALL='en_US.utf-8'", "/usr/local/bin/uwsgi", "--ini", "server.ini", "--module", "uwsgi", "--callable", "app"]
