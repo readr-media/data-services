@@ -23,3 +23,4 @@ feedparser==6.0.8
 draftjs-exporter==5.0.0
 lxml==4.7.1
 psycopg2-binary==2.9.3
+werkzeug==0.16.1
