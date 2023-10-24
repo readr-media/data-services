@@ -1,4 +1,4 @@
-Flask==2.0.2
+Flask==2.2.2
 pygsheets==2.0.5
 aiohttp==3.8.1
 uWSGI==2.0.17.1
@@ -23,4 +23,4 @@ feedparser==6.0.8
 draftjs-exporter==5.0.0
 lxml==4.7.1
 psycopg2-binary==2.9.3
-werkzeug==0.16.1
+Werkzeug==2.3.7
