@@ -35,6 +35,8 @@ SELECT "Politic"."person", "Politic"."politicCategory", count(*) FROM "Politic",
 
 def factcheck_data():
     categories = ['交通']
+    DATA_SERVICE = os.environ['DATA_SERVICE']
+    WHORU_BUCKET = os.environ['WHORU_BUCKET']
     for category in categories:
         gql_string = """
 query GetPresidents 
