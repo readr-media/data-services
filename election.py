@@ -36,8 +36,7 @@ SELECT "Politic"."person", "Politic"."politicCategory", count(*) FROM "Politic",
 def president_factcheck():
 	categories = ('交通')
 	for category in categories:
-	gql_string = '''
-query GetPresidents {
+	gql_string = '''query GetPresidents {
   personElections(
     orderBy:{ number: asc },
     where: {
@@ -104,8 +103,7 @@ query GetPresidents {
         repeatCount
     }
   }
-}
-''' % (category)
+}''' % (category)
 	data_endpoint = DATA_SERVICE + '/gql_to_json?bucket=' + WHORU_BUCKET + '&dest_file=files/json/president_' + category + '.json&gql_string=' + gql_string
 	r = requests.get(data_endpoint) 
 
