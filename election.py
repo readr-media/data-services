@@ -1,6 +1,7 @@
 import os
 import psycopg2
 import psycopg2.extras
+import requests
 from datetime import datetime, timezone, timedelta
 from configs import homepage_data
 
