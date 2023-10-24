@@ -20,7 +20,7 @@ def status_update():
     connection.commit()
     return "ok"
 
-def 2024_election():
+def election_2024():
     # just for 2024 election homepage json
     #db = os.environ['DBNAME']
     #db_user = os.environ['DATABASE_USER']
