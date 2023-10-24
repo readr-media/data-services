@@ -36,7 +36,8 @@ SELECT "Politic"."person", "Politic"."politicCategory", count(*) FROM "Politic",
 def president_factcheck():
 	categories = ('交通')
 	for category in categories:
-	gql_string = '''query GetPresidents {
+	gql_string = '''
+query GetPresidents {
   personElections(
     orderBy:{ number: asc },
     where: {
