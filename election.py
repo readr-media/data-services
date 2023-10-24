@@ -43,7 +43,7 @@ def factcheck_data():
 query GetPresidents 
   { personElections( 
     orderBy:{ number: asc }, 
-    where: { election: {type: { equals: "總統: }, 
+    where: { election: {type: { equals: "總統" }, 
              election_year_year: { equals: 2024 } }, 
              mainCandidate: null }) { 
       id 
