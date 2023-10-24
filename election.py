@@ -2,6 +2,7 @@ import os
 import psycopg2
 import psycopg2.extras
 import requests
+from data_export import sheet2json, gql2json, upload_data
 from datetime import datetime, timezone, timedelta
 from configs import homepage_data
 
@@ -38,6 +39,7 @@ def factcheck_data():
     categories = ['交通']
     DATA_SERVICE = os.environ['DATA_SERVICE']
     WHORU_BUCKET = os.environ['WHORU_BUCKET']
+    gql_endpoint = os.environ['GQL_ENDPOINT']
     for category in categories:
         gql_string = """
 query GetPresidents 
@@ -98,8 +100,8 @@ query GetPresidents
       } 
     }
 }""" % (category)
-        data_endpoint = DATA_SERVICE + '/gql_to_json?bucket=' + WHORU_BUCKET + '&dest_file=files/json/president_' + category + '.json&gql_string=' + gql_string
-        r = requests.get(data_endpoint) 
+    json_data = gql2json(gql_endpoint, gql_string)
+    upload_data(WHORU_BUCKET, json.dumps(json_data, ensure_ascii=False).encode('utf8'), 'application/json', dest_file)
     return "ok"
 
 if __name__=="__main__":
