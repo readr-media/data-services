@@ -1,4 +1,4 @@
-FROM gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+FROM python:3.9-slim
 
 COPY .  /usr/src/app/ga4-report
 WORKDIR  /usr/src/app/ga4-report
@@ -16,4 +16,4 @@ ENV PYTHONIOENCODING=utf8
 
 
 EXPOSE 8080
-CMD [ "env", "LC_ALL='en_US.utf-8'", "/usr/local/bin/uwsgi", "--ini", "server.ini", "--module", "uwsgi", "--callable", "app"]
+CMD [ "env", "LC_ALL='en_US.utf-8'", "/usr/local/bin/uwsgi", "--ini", "server.ini"]
