@@ -38,12 +38,13 @@ SELECT "Politic"."person", "Politic"."politicCategory", count(*) FROM "Politic",
 def factcheck_data():
     categories = ["2"]
     #DATA_SERVICE = os.environ['DATA_SERVICE']
-    WHORU_BUCKET = os.environ['WHORU_BUCKET']
+    #WHORU_BUCKET = os.environ['WHORU_BUCKET']
+    WHORU_BUCKET = 'whoareyou-gcs-dev.readr.tw'
     #gql_endpoint = os.environ['GQL_ENDPOINT']
     gql_endpoint = 'https://openrelationship-gql-dev-4g6paft7cq-de.a.run.app/api/graphql'
     for category in categories:
         gql_string = """
-query GetPresidents($category: String) {
+query GetPresidents {
   personElections(
     orderBy:{ number: asc },
     where: {
@@ -117,4 +118,4 @@ query GetPresidents($category: String) {
     return "ok"
 
 if __name__=="__main__":
-    election2024()
+    factcheck_data()
