@@ -36,13 +36,18 @@ SELECT "Politic"."person", "Politic"."politicCategory", count(*) FROM "Politic",
     return "ok"
 
 def factcheck_data():
-    categories = ["2"]
     #DATA_SERVICE = os.environ['DATA_SERVICE']
-    #WHORU_BUCKET = os.environ['WHORU_BUCKET']
-    WHORU_BUCKET = 'whoareyou-gcs-dev.readr.tw'
-    #gql_endpoint = os.environ['GQL_ENDPOINT']
-    gql_endpoint = 'https://openrelationship-gql-dev-4g6paft7cq-de.a.run.app/api/graphql'
-    for category in categories:
+    WHORU_BUCKET = os.environ['WHORU_BUCKET']
+    #WHORU_BUCKET = 'whoareyou-gcs-dev.readr.tw'
+    gql_endpoint = os.environ['WHORU_GQL_ENDPOINT']
+    #gql_endpoint = 'https://openrelationship-gql-dev-4g6paft7cq-de.a.run.app/api/graphql'
+    get_categories = """
+query { politicCategories {
+  id
+} }
+    """
+    categories = gql2json(gql_endpoint, get_categories)
+    for category in categories["politicCategories"]:
         gql_string = """
 query GetPresidents {
   personElections(
@@ -112,9 +117,9 @@ query GetPresidents {
     }
   }
 }
-""" % (category, category)
+""" % (category['id'], category['id'])
     json_data = gql2json(gql_endpoint, gql_string)
-    dest_file = 'json/landing_factcheck.json'
+    dest_file = """json/landing_factcheck_%s.json""" % (category["id"])
     upload_data(WHORU_BUCKET, json.dumps(json_data, ensure_ascii=False).encode('utf8'), 'application/json', dest_file)
     return "ok"
 
