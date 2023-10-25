@@ -51,6 +51,7 @@ query  data {
 }
 """
     json_data = gql2json(gql_endpoint, gql_string)
+    dest_file = 'json/landing_factcheck.json'
     upload_data(WHORU_BUCKET, json.dumps(json_data, ensure_ascii=False).encode('utf8'), 'application/json', dest_file)
     return "ok"
 
