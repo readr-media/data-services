@@ -3,13 +3,9 @@ import psycopg2
 import psycopg2.extras
 import requests
 import json
-import sys
-import codecs
 from data_export import sheet2json, gql2json, upload_data
 from datetime import datetime, timezone, timedelta
 from configs import homepage_data
-
-sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
 
 def election2024():
     # just for 2024 election homepage json
@@ -40,7 +36,7 @@ SELECT "Politic"."person", "Politic"."politicCategory", count(*) FROM "Politic",
     return "ok"
 
 def factcheck_data():
-    categories = ['交通']
+    categories = ["2"]
     #DATA_SERVICE = os.environ['DATA_SERVICE']
     WHORU_BUCKET = os.environ['WHORU_BUCKET']
     #gql_endpoint = os.environ['GQL_ENDPOINT']
@@ -51,8 +47,7 @@ query GetPresidents($category: String) {
   personElections(
     orderBy:{ number: asc },
     where: {
-      election: {type: { equals: "總統" },
-      election_year_year: { equals: 2024 } },
+      election: {id: { equals: 85 } },
       mainCandidate: null
     }) {
     id
@@ -70,7 +65,7 @@ query GetPresidents($category: String) {
       where: {
         status: { equals: "verified" },
         reviewed: { equals: true }
-        politicCategory: { name: { equals: %s } }
+        politicCategory: { id: { equals: %s } }
       }) {
         id
         content

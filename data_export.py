@@ -2,13 +2,9 @@ import os
 import json
 
 import pygsheets
-import sys
-import codecs
 from gql.transport.aiohttp import AIOHTTPTransport
 from gql import gql, Client
 from google.cloud import storage
-
-sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
 
 def sheet2json( url, sheet ):
     gc = pygsheets.authorize(service_account_env_var = 'GDRIVE_API_CREDENTIALS')
