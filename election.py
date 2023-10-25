@@ -2,6 +2,7 @@ import os
 import psycopg2
 import psycopg2.extras
 import requests
+import json
 from data_export import sheet2json, gql2json, upload_data
 from datetime import datetime, timezone, timedelta
 from configs import homepage_data
@@ -37,7 +38,7 @@ SELECT "Politic"."person", "Politic"."politicCategory", count(*) FROM "Politic",
 
 def factcheck_data():
     categories = ['交通']
-    DATA_SERVICE = os.environ['DATA_SERVICE']
+    #DATA_SERVICE = os.environ['DATA_SERVICE']
     WHORU_BUCKET = os.environ['WHORU_BUCKET']
     #gql_endpoint = os.environ['GQL_ENDPOINT']
     gql_endpoint = 'https://openrelationship-gql-dev-4g6paft7cq-de.a.run.app/api/graphql'
