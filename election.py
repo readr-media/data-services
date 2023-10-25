@@ -43,63 +43,11 @@ def factcheck_data():
     gql_endpoint = 'https://openrelationship-gql-dev-4g6paft7cq-de.a.run.app/api/graphql'
     for category in categories:
         gql_string = """
-query GetPresidents 
-  { personElections( 
-    orderBy:{ number: asc }, 
-    where: { election: {type: { equals: "總統" }, 
-             election_year_year: { equals: 2024 } }, 
-             mainCandidate: null }) { 
-      id 
-      number 
-      person_id { 
-        id 
-        name 
-      } 
-      politicsCount( where: { status: { equals: "verified" }, reviewed: { equals: true } }) 
-      politics( where: { status: { equals: "verified" }, reviewed: { equals: true } 
-      politicCategory: { name: { equals: '%s' } } }) { 
-        id 
-        content 
-        politicCategory { 
-          id 
-          name 
-        } 
-        positionChange { 
-          id 
-          isChanged 
-          factcheckPartner { 
-            id 
-            name 
-          } 
-        } 
-        positionChangeCount 
-        expertPoint { 
-          id 
-          expertPointSummary 
-          expert 
-        } 
-        expertPointCount 
-        factCheck { 
-          id 
-          factCheckSummary 
-          checkResultType 
-          factcheckPartner { 
-            id 
-            name 
-          } 
-        } 
-        factCheckCount 
-        repeat { 
-          id 
-          repeatSummary 
-          factcheckPartner { 
-            id 
-            name 
-          } 
-        } 
-        repeatCount 
-      } 
-    }
+query  data {
+  personElections {
+    id
+  }
+}
 }""" % (category)
     json_data = gql2json(gql_endpoint, gql_string)
     upload_data(WHORU_BUCKET, json.dumps(json_data, ensure_ascii=False).encode('utf8'), 'application/json', dest_file)
