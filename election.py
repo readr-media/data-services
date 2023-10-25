@@ -3,10 +3,13 @@ import psycopg2
 import psycopg2.extras
 import requests
 import json
+import sys
+import codecs
 from data_export import sheet2json, gql2json, upload_data
 from datetime import datetime, timezone, timedelta
 from configs import homepage_data
 
+sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
 
 def election2024():
     # just for 2024 election homepage json
@@ -113,7 +116,7 @@ query GetPresidents($category: String) {
   }
 }
 """ % (category)
-    json_data = gql2json(gql_endpoint, gql_string.encode('utf-8'))
+    json_data = gql2json(gql_endpoint, gql_string)
     dest_file = 'json/landing_factcheck.json'
     upload_data(WHORU_BUCKET, json.dumps(json_data, ensure_ascii=False).encode('utf8'), 'application/json', dest_file)
     return "ok"
