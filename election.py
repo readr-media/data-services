@@ -48,6 +48,7 @@ query { politicCategories {
     """
     categories = gql2json(gql_endpoint, get_categories)
     for category in categories["politicCategories"]:
+        print(category['id'])
         gql_string = """
 query GetPresidents {
   personElections(
@@ -118,9 +119,9 @@ query GetPresidents {
   }
 }
 """ % (category['id'], category['id'])
-    json_data = gql2json(gql_endpoint, gql_string)
-    dest_file = """json/landing_factcheck_%s.json""" % (category["id"])
-    upload_data(WHORU_BUCKET, json.dumps(json_data, ensure_ascii=False).encode('utf8'), 'application/json', dest_file)
+        json_data = gql2json(gql_endpoint, gql_string)
+        dest_file = """json/landing_factcheck_%s.json""" % (category["id"])
+        upload_data(WHORU_BUCKET, json.dumps(json_data, ensure_ascii=False).encode('utf8'), 'application/json', dest_file)
     return "ok"
 
 if __name__=="__main__":
