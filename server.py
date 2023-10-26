@@ -2,7 +2,7 @@ from flask import Flask, request
 from data_export import sheet2json, gql2json, upload_data
 from rss_generator import gql2rss
 from scheduled_update import status_update
-from election import factcheck_data
+from election import factcheck_data, election2024
 import os
 import json
 
@@ -12,6 +12,7 @@ gql_endpoint = os.environ['GQL_ENDPOINT']
 @app.route("/president_factcheck")
 def president_fackcheck_json():
 	factcheck_data()
+    election2024()
 	return "ok"
 
 @app.route("/gql_to_json")
