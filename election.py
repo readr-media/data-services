@@ -59,14 +59,16 @@ query GetPresidents {
 query { politicCategories {
   id
   name
+  displayColor
 } }
     """
     categories = gql2json(gql_endpoint, get_categories)
 
     category_base = {}
     for category in categories["politicCategories"]:
-        category_base[category["name"]] = 0
+        category_base[category["name"]] = {"count": 0, "displayColor": category["displayColor"]}
     #==============================================
+    all_categories = category_base
     for candidate in all_candidates["personElections"]:
         candidate_data = {}
         candidate_data["categories_count"] = category_base
@@ -75,6 +77,8 @@ query { politicCategories {
         candidate_data["factCheckCount"] = 0
         candidate_data["repeatCount"] = 0
         candidate_data["politicsCount"] = candidate["politicsCount"]
+        candidate_data["number"] = candidate["number"]
+        candidate_data["person_id"] = candidate["person_id"]["id"]
         if "politics" in candidate:
             for policy in candidate["politics"]:
                 candidate_data["positionChangeCount"] += policy["positionChangeCount"]
@@ -82,10 +86,13 @@ query { politicCategories {
                 candidate_data["factCheckCount"] += policy["factCheckCount"]
                 candidate_data["repeatCount"] += policy["repeatCount"]
                 if policy is not None and "politicCategory" in policy and policy["politicCategory"] is not None and "name" in policy["politicCategory"] and policy["politicCategory"]["name"] in candidate_data["categories_count"]:
-                    candidate_data["categories_count"][policy["politicCategory"]["name"]] += 1
+                    candidate_data["categories_count"][policy["politicCategory"]["name"]]["count"] += 1
+                    all_categories[policy["politicCategory"]["name"]]["count"] += 1
         candidate_statistics[candidate["person_id"]["name"]] = candidate_data
+    full_data = {"categories": all_categories, "president_candidates": candidate_statistics}
+    print(full_data)
     dest_file = "json/landing_statitics.json"
-    upload_data(WHORU_BUCKET, json.dumps(candidate_statistics, ensure_ascii=False).encode('utf8'), 'application/json', dest_file)
+    upload_data(WHORU_BUCKET, json.dumps(full_data, ensure_ascii=False).encode('utf8'), 'application/json', dest_file)
     return "ok"
 
 def factcheck_data():
