@@ -90,7 +90,6 @@ query { politicCategories {
                     all_categories[policy["politicCategory"]["name"]]["count"] += 1
         candidate_statistics[candidate["person_id"]["name"]] = candidate_data
     full_data = {"categories": all_categories, "president_candidates": candidate_statistics}
-    print(full_data)
     dest_file = "json/landing_statitics.json"
     upload_data(WHORU_BUCKET, json.dumps(full_data, ensure_ascii=False).encode('utf8'), 'application/json', dest_file)
     return "ok"
