@@ -12,7 +12,7 @@ gql_endpoint = os.environ['GQL_ENDPOINT']
 @app.route("/president_factcheck")
 def president_fackcheck_json():
 	factcheck_data()
-    election2024()
+	election2024()
 	return "ok"
 
 @app.route("/gql_to_json")
