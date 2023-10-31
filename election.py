@@ -66,7 +66,7 @@ query { politicCategories {
 
     category_base = {}
     for category in categories["politicCategories"]:
-        category_base[category["name"]] = {"count": 0, "id": category["id"]}
+        category_base[category["name"]] = {"count": 0, "id": category["id"], "displayColor": category["displayColor"]}
     #==============================================
     all_categories = category_base
     for candidate in all_candidates["personElections"]:
@@ -143,6 +143,7 @@ query GetPresidents {
         positionChange {
           id
           isChanged
+          positionChangeSummary
           factcheckPartner {
             id
             name
@@ -159,6 +160,7 @@ query GetPresidents {
           id
           factCheckSummary
           checkResultType
+          checkResultOther
           factcheckPartner {
             id
             name
