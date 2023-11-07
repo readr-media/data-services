@@ -1,9 +1,10 @@
-Flask==2.0.2
+Flask==3.0.0
 pygsheets==2.0.5
 aiohttp==3.8.1
-uWSGI==2.0.17.1
+uWSGI==2.0.21
 requests==2.22.0
 urllib3==1.25.3
+requests-toolbelt==1.0.0 
 gql==3.0.0
 google-api-python-client==2.34.0
 google-cloud-storage==1.44.0

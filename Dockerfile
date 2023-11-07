@@ -1,7 +1,7 @@
-FROM gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+FROM python:3.9-slim
 
-COPY .  /usr/src/app/ga4-report
-WORKDIR  /usr/src/app/ga4-report
+COPY .  /usr/src/app/data-service
+WORKDIR  /usr/src/app/data-service
 
 RUN addgroup user && adduser -h /home/user -D user -G user -s /bin/sh
 
