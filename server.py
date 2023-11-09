@@ -16,6 +16,8 @@ def generate_json_from_gql():
 	alt_gql_endpoint = request.args.get('gql_endpoint')
 	if alt_gql_endpoint:
 		gql_endpoint = alt_gql_endpoint
+	else:
+		gql_endpoint = os.environ['GQL_ENDPOINT']
 	json_data = gql2json(gql_endpoint, gql_string)
 	upload_data(bucket, json.dumps(json_data, ensure_ascii=False).encode('utf8'), 'application/json', dest_file)
 	return "ok"
