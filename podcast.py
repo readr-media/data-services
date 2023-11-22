@@ -10,7 +10,6 @@ def mirrorvoice_filter(author_filter, feedurl):
     all_eps = []
     if 'episodes' in parsed and isinstance(parsed['episodes'], list):
         for ep in parsed['episodes']:
-            print(ep)
             item = {}
             item['published'] = datetime.fromtimestamp(ep['published']).strftime("%m/%d/%Y, %H:%M:%S")
             item['author'] = ep['itunes_author']
