@@ -1,6 +1,6 @@
 import podcastparser
 import urllib.request
-from datetime import datetime
+from datetime import datetime, timedelta
 from data_export import upload_data
 
 def mirrorvoice_filter(author_filter, feedurl):
@@ -19,6 +19,7 @@ def mirrorvoice_filter(author_filter, feedurl):
             item['link'] = ep['link']
             item['guid'] = ep['guid']
             item['title'] = ep['title']
+            item['duration'] = str(timedelta(seconds=ep['total_time']))
             item['category'] = '新聞議題記者現場'
             all_eps.append(item)
     return all_eps
