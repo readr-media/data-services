@@ -58,6 +58,7 @@ def get_podcasts_from_mirrorvoice():
     feedurl = request.args.get('feed_url', default = 'https://feed.mirrorvoice.com.tw/rss/mnews.xml')
     bucket = request.args.get('bucket')
     dest_file = request.args.get('dest_file')
+    author_filter = []
     podcast_json = mirrorvoice_filter(author_filter, feedurl)
     #print(podcast_json)
     json_data = json.dumps(podcast_json, ensure_ascii=False).encode('utf8')
