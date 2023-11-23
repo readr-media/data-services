@@ -1,8 +1,10 @@
 import podcastparser
 import urllib.request
+import pytz
 from datetime import datetime, timedelta
 from data_export import upload_data
 
+tz = pytz.timezone('Asia/Taipei')
 def mirrorvoice_filter(author_filter, feedurl):
     parsed = podcastparser.parse(feedurl, urllib.request.urlopen(feedurl))
 
@@ -11,7 +13,7 @@ def mirrorvoice_filter(author_filter, feedurl):
     if 'episodes' in parsed and isinstance(parsed['episodes'], list):
         for ep in parsed['episodes']:
             item = {}
-            item['published'] = datetime.fromtimestamp(ep['published']).strftime("%m/%d/%Y, %H:%M:%S")
+            item['published'] = datetime.fromtimestamp(ep['published']).replace(tzinfo=tz).strftime("%m/%d/%Y, %H:%M:%S")
             item['author'] = ep['itunes_author']
             item['description'] = ep['description']
             item['heroImage'] = ep['episode_art_url']
