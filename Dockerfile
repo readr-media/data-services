@@ -10,7 +10,9 @@ RUN apt-get update \
     && pip install --upgrade pip \
     && pip install -r requirements.txt
 
-RUN apk add --no-cache tzdata
+RUN apt-get update && \
+    apt-get install -yq tzdata && \
+    dpkg-reconfigure -f noninteractive tzdata
 
 ENV TZ="Asia/Taipei"
 
