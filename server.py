@@ -60,9 +60,6 @@ def get_podcasts_from_mirrorvoice():
     dest_file = request.args.get('dest_file')
     author_filter = []
     podcast_json = mirrorvoice_filter(author_filter, feedurl)
-    #print(podcast_json)
-    for ep in podcast_json:
-        print("datetime = " + ep['published'])
     json_data = json.dumps(podcast_json, ensure_ascii=False).encode('utf8')
     upload_data(bucket, json_data, 'application/json', dest_file)
     return "ok"
