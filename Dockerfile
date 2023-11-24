@@ -10,6 +10,10 @@ RUN apt-get update \
     && pip install --upgrade pip \
     && pip install -r requirements.txt
 
+RUN apk add --no-cache tzdata
+
+ENV TZ="Asia/Taipei"
+
 ENV LC_ALL="en_US.utf8" 
 ENV LANG=en_US.UTF-8
 ENV PYTHONIOENCODING=utf8
