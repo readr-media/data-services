@@ -13,7 +13,9 @@ def mirrorvoice_filter(author_filter, feedurl):
     if 'episodes' in parsed and isinstance(parsed['episodes'], list):
         for ep in parsed['episodes']:
             item = {}
-            item['published'] = datetime.fromtimestamp(ep['published']).replace(tzinfo=tz).strftime("%m/%d/%Y, %H:%M:%S")
+            localtime = datetime.fromtimestamp(ep['published']).replace(tzinfo=tz)
+            #+ timedelta(hours = 8)
+            item['published'] = localtime.strftime("%m/%d/%Y, %H:%M:%S")
             item['author'] = ep['itunes_author']
             item['description'] = ep['description']
             item['heroImage'] = ep['episode_art_url']
