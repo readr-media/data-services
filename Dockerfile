@@ -10,6 +10,12 @@ RUN apt-get update \
     && pip install --upgrade pip \
     && pip install -r requirements.txt
 
+RUN apt-get update && \
+    apt-get install -yq tzdata && \
+    dpkg-reconfigure -f noninteractive tzdata
+
+ENV TZ="Asia/Taipei"
+
 ENV LC_ALL="en_US.utf8" 
 ENV LANG=en_US.UTF-8
 ENV PYTHONIOENCODING=utf8
