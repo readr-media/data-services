@@ -2,7 +2,7 @@ import xml.etree.cElementTree as ET
 import pytz
 from datetime import datetime
 
-def post_url(style = 'news', slug, id):
+def post_url(style, slug, id):
 	if style = 'news' or style = 'review':
 		return "https://www.readr.tw/post/{id}"
 	if style = 'report': 
