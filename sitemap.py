@@ -3,11 +3,11 @@ import pytz
 from datetime import datetime
 
 def post_url(style, slug, id):
-	if style = 'news' or style = 'review':
+	if style == 'news' or style == 'review':
 		return "https://www.readr.tw/post/{id}"
-	if style = 'report': 
+	if style == 'report': 
 		return "https://www.readr.tw/project/{slug}"
-	if style = 'project3': 
+	if style == 'project3': 
 		return "https://www.readr.tw/project/3/{slug}"
 
 def generate_sitemap( page, rows, uid = 'id', priority = '0.8', changefreq = 'weekly' ):
