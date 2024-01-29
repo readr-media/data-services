@@ -109,6 +109,7 @@ def generate_sitemaps(rows, object_name: str, field: str='slug', chunk_size: int
         Google would ignore "changefreq" and "priority", don't need to provide them now
     '''
     xml_strings = []
+    target_timezone = pytz.timezone('Asia/Taipei')
     rows = rows['items']
     schema_loc = "http://www.sitemaps.org/schemas/sitemap/0.9"
 
@@ -123,8 +124,9 @@ def generate_sitemaps(rows, object_name: str, field: str='slug', chunk_size: int
             updatedAt = row.get('updatedAt', None)
             if field==None or updatedAt==None:
                 continue
-            timestamp_datetime = datetime.strptime(updatedAt, "%Y-%m-%dT%H:%M:%S.%fZ")
-            formatted_date = timestamp_datetime.strftime("%Y-%m-%d")
+            timestamp_datetime_utc  = datetime.strptime(updatedAt, "%Y-%m-%dT%H:%M:%S.%fZ")
+            timestamp_datetime_utc8 = timestamp_datetime_utc.astimezone(target_timezone)
+            formatted_date = timestamp_datetime_utc8.strftime("%Y-%m-%d")
             
             doc = ET.SubElement(root, "url")
             ET.SubElement(doc, 'loc').text = BASE_URL + object_name + '/' + quote(name)
