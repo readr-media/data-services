@@ -46,8 +46,8 @@ def scheduled_publish():
     return_message = status_update()
     return return_message
 
-@app.route("/sitemap/test", methods=['POST'])
-def sitemap_test():
+@app.route("/sitemap/generator", methods=['POST'])
+def sitemap_generator():
     msg = request.get_json()
     target_objects = msg.get('target_objects', None)
     chunk_size = msg.get('chunk_size', 1000)
@@ -81,36 +81,6 @@ def sitemap_test():
     sitemap_index_xml = sitemap.generate_sitemap_index(sitemap_files)
     upload_data(BUCKET, sitemap_index_xml, "Application/xml", os.path.join(folder, 'sitemap_index.xml'))
     return "ok"
-
-@app.route("/sitemap/generator")
-def sitemap_generator():
-    query = request.args.get('query')
-    list_name = request.args.get('list_name')
-    page = request.args.get('page')
-    id_field = request.args.get('id_field')
-    priority = request.args.get('priority')
-    dest_file = request.args.get('dest_file')
-    news_sitemap_dest = request.args.get('news_sitemap')
-
-    GQL_PREVIEW_ENDPOINT = os.environ.get('GQL_PREVIEW_ENDPOINT', 'http://localhost:3000/api/graphql')
-    transport = RequestsHTTPTransport(url=GQL_PREVIEW_ENDPOINT)
-    client = Client(transport=transport, fetch_schema_from_transport=False)
-    now = datetime.utcnow().isoformat(timespec='microseconds') + "Z"
-    sitemap = ''
-    with client as session:
-        resp = session.execute(gql(query))
-        if len(resp[list_name]) == 0:
-            return 'No externals result'
-        else:
-            if list_name in resp:
-                sitemap = sitemap.generate_sitemap( page, resp[list_name], id_field, priority)
-            else:
-                print(resp)
-            if news_sitemap_dest:
-                news_sitemap_dest = sitemap.generate_news_sitemap( page, resp[list_name], id_field, priority)
-                upload_data(BUCKET, sitemap.news_sitemap, "Application/xml", news_sitemap_dest)
-    upload_data(BUCKET, sitemap, "Application/xml", dest_file)
-    return "OK"
 
 @app.route("/sitemap/posts")
 def generate_posts_sitemap():

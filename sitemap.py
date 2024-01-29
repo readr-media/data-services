@@ -91,8 +91,6 @@ def generate_news_sitemap( page, rows, uid = 'id', priority = '0.8', changefreq 
         ET.SubElement(media, "news:language").text = "zh-tw"
         ET.SubElement(news_item, "news:title").text = slug["title"]
         ET.SubElement(news_item, "news:publication_date").text = item_time
-
-            
     tree = ET.ElementTree(root)
     xml_string = ET.tostring(root, encoding='utf-8')
     return xml_string
@@ -146,7 +144,3 @@ def generate_sitemaps(rows, object_name: str, field: str='slug', chunk_size: int
             ET.SubElement(doc, 'lastmod').text = formatted_date
         xml_strings.append(ET.tostring(root, encoding='utf-8'))
     return xml_strings
-
-if __name__ == "__main__":
-    result = generate_news_sitemap( "story", [ { "slug": "healthnews_d5f2db9d17756a72ca1b3d3380fb0931", "title": "123", "updatedAt": "2023-06-20T04:50:28.453Z" }, { "slug": "healthnews_1270bf939a8275e7de953525e5aca38a", "title": "456", "updatedAt": "2023-06-20T04:50:28.434Z"}], "slug" )
-    print(result)
