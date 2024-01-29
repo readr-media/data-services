@@ -4,7 +4,7 @@ import os
 from urllib.parse import quote
 from datetime import datetime
 
-BASE_URL = os.environ['BASE_URL']
+BASE_URL = os.environ.get('BASE_URL', None)
 
 tv_field_mapping = {
     'show': 'slug',
