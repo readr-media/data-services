@@ -1,6 +1,16 @@
 import xml.etree.cElementTree as ET
 import pytz
+import os
+from urllib.parse import quote
 from datetime import datetime
+
+BASE_URL = os.environ['BASE_URL']
+
+tv_field_mapping = {
+    'show': 'slug',
+    'topic': 'slug',
+    'tag': 'name'
+}
 
 def post_url(style, slug, id):
 	if style == 'news' or style == 'review':
@@ -85,6 +95,42 @@ def generate_news_sitemap( page, rows, uid = 'id', priority = '0.8', changefreq 
     tree = ET.ElementTree(root)
     xml_string = ET.tostring(root, encoding='utf-8')
     return xml_string
+
+def generate_sitemaps(rows, object_name: str, field: str='slug', chunk_size: int=1000):
+    '''
+    Input:
+        rows        - The json returned from gql query
+        object_name - Topics/Shows/Tags, etc...
+        field       - The field of gql row you'd like to use as appendage of url
+        chunk_size  - Split number of rows into multiple sitemaps by chunk_size
+    Output:
+        [xml_string] - The array of xml_string format after encoding='utf-8'
+    Note:
+        Google would ignore "changefreq" and "priority", don't need to provide them now
+    '''
+    xml_strings = []
+    rows = rows['items']
+    schema_loc = "http://www.sitemaps.org/schemas/sitemap/0.9"
+
+    for start_index in range(0, len(rows), chunk_size):
+        end_index = min(start_index+chunk_size, len(rows))
+        current_chunk = rows[start_index: end_index]
+
+        root = ET.Element('urlset')
+        root.attrib['xmlns'] = schema_loc
+        for row in current_chunk:
+            name = row.get(field, None)
+            updatedAt = row.get('updatedAt', None)
+            if field==None or updatedAt==None:
+                continue
+            timestamp_datetime = datetime.strptime(updatedAt, "%Y-%m-%dT%H:%M:%S.%fZ")
+            formatted_date = timestamp_datetime.strftime("%Y-%m-%d")
+            
+            doc = ET.SubElement(root, "url")
+            ET.SubElement(doc, 'loc').text = BASE_URL + object_name + '/' + quote(name)
+            ET.SubElement(doc, 'lastmod').text = formatted_date
+        xml_strings.append(ET.tostring(root, encoding='utf-8'))
+    return xml_strings
 
 if __name__ == "__main__":
     result = generate_news_sitemap( "story", [ { "slug": "healthnews_d5f2db9d17756a72ca1b3d3380fb0931", "title": "123", "updatedAt": "2023-06-20T04:50:28.453Z" }, { "slug": "healthnews_1270bf939a8275e7de953525e5aca38a", "title": "456", "updatedAt": "2023-06-20T04:50:28.434Z"}], "slug" )

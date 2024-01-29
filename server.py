@@ -3,12 +3,18 @@ from data_export import sheet2json, gql2json, upload_data
 from rss_generator import gql2rss
 from scheduled_update import status_update
 from podcast import mirrorvoice_filter
-from sitemap import generate_sitemap
+import sitemap
 import os
 import json
+import utils.query as query
+
+from datetime import datetime
+from gql import gql, Client
+from gql.transport.requests import RequestsHTTPTransport
 
 app = Flask(__name__)
 gql_endpoint = os.environ['GQL_ENDPOINT']
+BUCKET = os.environ.get('BUCKET', None)
 
 @app.route("/gql_to_json")
 def generate_json_from_gql():
@@ -39,6 +45,29 @@ def scheduled_publish():
     return_message = status_update()
     return return_message
 
+@app.route("/sitemap/test", methods=['POST'])
+def sitemap_test():
+    payload = json.load(request.data)
+    target_objects = payload.get('target_objects', None)
+    chunk_size = payload.get('chunk_size', 1000)
+    if target_objects==None:
+        return "query parameters error"
+    objects = [obj.strip() for obj in target_objects]
+
+    for object_name in objects:
+        gql_string = query.tv_object_mapping[object_name]
+        gql_result = query.gql_fetch(gql_endpoint=gql_endpoint, gql_string=gql_string)
+
+        xml_strings = sitemap.generate_sitemaps(
+            rows = gql_result,
+            object_name = object_name,
+            field = sitemap.tv_field_mapping[object_name],
+            chunk_size = chunk_size
+        )
+        for sitemap_xml in xml_strings:
+            upload_data(BUCKET, sitemap_xml, "Application/xml", f'rss/sitemap_{object_name}.xml')
+    return "ok"
+
 @app.route("/sitemap/generator")
 def sitemap_generator():
     query = request.args.get('query')
@@ -48,8 +77,7 @@ def sitemap_generator():
     priority = request.args.get('priority')
     dest_file = request.args.get('dest_file')
     news_sitemap_dest = request.args.get('news_sitemap')
-    
-    BUCKET = os.environ['BUCKET']
+
     GQL_PREVIEW_ENDPOINT = os.environ.get('GQL_PREVIEW_ENDPOINT', 'http://localhost:3000/api/graphql')
     transport = RequestsHTTPTransport(url=GQL_PREVIEW_ENDPOINT)
     client = Client(transport=transport, fetch_schema_from_transport=False)
@@ -61,12 +89,12 @@ def sitemap_generator():
             return 'No externals result'
         else:
             if list_name in resp:
-                sitemap = generate_sitemap( page, resp[list_name], id_field, priority)
+                sitemap = sitemap.generate_sitemap( page, resp[list_name], id_field, priority)
             else:
                 print(resp)
             if news_sitemap_dest:
-                news_sitemap_dest = generate_news_sitemap( page, resp[list_name], id_field, priority)
-                upload_data(BUCKET, news_sitemap, "Application/xml", news_sitemap_dest)
+                news_sitemap_dest = sitemap.generate_news_sitemap( page, resp[list_name], id_field, priority)
+                upload_data(BUCKET, sitemap.news_sitemap, "Application/xml", news_sitemap_dest)
     upload_data(BUCKET, sitemap, "Application/xml", dest_file)
     return "OK"
 
@@ -93,8 +121,8 @@ def generate_posts_sitemap():
             return 'No externals result'
         else:
             if 'posts' in resp:
-                sitemap = generate_sitemap( 'post', resp['posts'], 'id', "1.0")
-                news_sitemap = generate_news_sitemap( 'story', resp['posts'][:700], 'slug', "1.0")
+                sitemap = sitemap.generate_sitemap( 'post', resp['posts'], 'id', "1.0")
+                news_sitemap = sitemap.generate_news_sitemap( 'story', resp['posts'][:700], 'slug', "1.0")
             else:
                 print(resp)
     upload_data(BUCKET, sitemap, "Application/xml", "rss/posts.xml")
