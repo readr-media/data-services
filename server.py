@@ -47,9 +47,9 @@ def scheduled_publish():
 
 @app.route("/sitemap/test", methods=['POST'])
 def sitemap_test():
-    payload = json.load(request.data)
-    target_objects = payload.get('target_objects', None)
-    chunk_size = payload.get('chunk_size', 1000)
+    msg = request.get_json()
+    target_objects = msg.get('target_objects', None)
+    chunk_size = msg.get('chunk_size', 1000)
     if target_objects==None:
         return "query parameters error"
     objects = [obj.strip() for obj in target_objects]
