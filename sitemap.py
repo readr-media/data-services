@@ -96,6 +96,18 @@ def generate_news_sitemap( page, rows, uid = 'id', priority = '0.8', changefreq 
     xml_string = ET.tostring(root, encoding='utf-8')
     return xml_string
 
+def generate_sitemap_index(sitemap_files):
+    schema_loc = "http://www.sitemaps.org/schemas/sitemap/0.9"
+    root = ET.Element('sitemapindex')
+    root.attrib['xmlns'] = schema_loc
+    for info in sitemap_files:
+        filename = info['filename']
+        doc = ET.SubElement(root, "sitemap")
+        ET.SubElement(doc, 'loc').text = f'https://{BASE_URL}/{filename}'
+        ET.SubElement(doc, 'lastmod').text = info['lastmod']
+    xml_string = ET.tostring(root, encoding='utf-8')
+    return xml_string
+
 def generate_sitemaps(rows, object_name: str, field: str='slug', chunk_size: int=1000):
     '''
     Input:

@@ -54,6 +54,8 @@ def sitemap_test():
         return "query parameters error"
     objects = [obj.strip() for obj in target_objects]
 
+    sitemap_files = []
+    folder = os.path.join('rss', 'sitemap')
     for object_name in objects:
         gql_string = query.tv_object_mapping[object_name]
         gql_result = query.gql_fetch(gql_endpoint=gql_endpoint, gql_string=gql_string)
@@ -64,8 +66,15 @@ def sitemap_test():
             field = sitemap.tv_field_mapping[object_name],
             chunk_size = chunk_size
         )
-        for sitemap_xml in xml_strings:
-            upload_data(BUCKET, sitemap_xml, "Application/xml", f'rss/sitemap_{object_name}.xml')
+        for index, sitemap_xml in enumerate(xml_strings):
+            filename = f'sitemap_{object_name}{index+1}.xml'
+            upload_data(BUCKET, sitemap_xml, "Application/xml", os.path.join(folder, filename))
+            sitemap_files.append({
+                 'filename': os.path.join(folder, filename),
+                 'lastmod': '2024-01-29'
+            })
+    sitemap_index_xml = sitemap.generate_sitemap_index(sitemap_files)
+    upload_data(BUCKET, sitemap_index_xml, "Application/xml", os.path.join(folder, 'sitemap_index.xml'))
     return "ok"
 
 @app.route("/sitemap/generator")
