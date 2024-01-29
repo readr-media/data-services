@@ -6,6 +6,7 @@ from podcast import mirrorvoice_filter
 import sitemap
 import os
 import json
+import pytz
 import utils.query as query
 
 from datetime import datetime
@@ -69,9 +70,13 @@ def sitemap_test():
         for index, sitemap_xml in enumerate(xml_strings):
             filename = f'sitemap_{object_name}{index+1}.xml'
             upload_data(BUCKET, sitemap_xml, "Application/xml", os.path.join(folder, filename))
+            
+            time_utc  = datetime.now()
+            timezone  = pytz.timezone('Asia/Taipei')
+            lastmod = time_utc.astimezone(timezone).strftime("%Y-%m-%d")
             sitemap_files.append({
                  'filename': os.path.join(folder, filename),
-                 'lastmod': '2024-01-29'
+                 'lastmod': lastmod
             })
     sitemap_index_xml = sitemap.generate_sitemap_index(sitemap_files)
     upload_data(BUCKET, sitemap_index_xml, "Application/xml", os.path.join(folder, 'sitemap_index.xml'))

@@ -5,6 +5,7 @@ from urllib.parse import quote
 from datetime import datetime
 
 BASE_URL = os.environ.get('BASE_URL', None)
+BUCKET   = os.environ.get('BUCKET', None)
 
 tv_field_mapping = {
     'show': 'slug',
@@ -103,7 +104,7 @@ def generate_sitemap_index(sitemap_files):
     for info in sitemap_files:
         filename = info['filename']
         doc = ET.SubElement(root, "sitemap")
-        ET.SubElement(doc, 'loc').text = f'https://{BASE_URL}{filename}'
+        ET.SubElement(doc, 'loc').text = f'https://{BUCKET}/{filename}'
         ET.SubElement(doc, 'lastmod').text = info['lastmod']
     xml_string = ET.tostring(root, encoding='utf-8')
     return xml_string
