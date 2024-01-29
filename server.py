@@ -48,9 +48,15 @@ def scheduled_publish():
 
 @app.route("/sitemap/generator", methods=['POST'])
 def sitemap_generator():
+    '''
+        You should provide two arguments in payload json
+        (1) target_objects: eg.['show', 'topic', ...etc], you cand find them at CMS
+        (2) chunk_size[opt]: Upper limit for a single sitemap xml
+    '''
     msg = request.get_json()
     target_objects = msg.get('target_objects', None)
     chunk_size = msg.get('chunk_size', 1000)
+    app = msg.get('app', 'tv')
     if target_objects==None:
         return "query parameters error"
     objects = [obj.strip() for obj in target_objects]
@@ -62,9 +68,9 @@ def sitemap_generator():
         gql_result = query.gql_fetch(gql_endpoint=gql_endpoint, gql_string=gql_string)
 
         xml_strings = sitemap.generate_sitemaps(
-            rows = gql_result,
+            rows = gql_result['items'],
+            app = app,
             object_name = object_name,
-            field = sitemap.tv_field_mapping[object_name],
             chunk_size = chunk_size
         )
         for index, sitemap_xml in enumerate(xml_strings):
@@ -81,37 +87,6 @@ def sitemap_generator():
     sitemap_index_xml = sitemap.generate_sitemap_index(sitemap_files)
     upload_data(BUCKET, sitemap_index_xml, "Application/xml", os.path.join(folder, 'sitemap_index.xml'))
     return "ok"
-
-@app.route("/sitemap/posts")
-def generate_posts_sitemap():
-    BUCKET = os.environ['BUCKET']
-    GQL_PREVIEW_ENDPOINT = os.environ.get('GQL_PREVIEW_ENDPOINT', 'http://localhost:3000/api/graphql')
-    transport = RequestsHTTPTransport(url=GQL_PREVIEW_ENDPOINT)
-    client = Client(transport=transport, fetch_schema_from_transport=False)
-    sitemap = ''
-    with client as session:
-        query = '''
-			query Posts {
-			  posts(take:3000, where: { state: { equals: "published"}}, orderBy: { id: desc}) {
-				slug
-				id
-				style
-				name
-			  }
-			}
-		'''
-        resp = session.execute(gql(query))
-        if len(resp['posts']) == 0:
-            return 'No externals result'
-        else:
-            if 'posts' in resp:
-                sitemap = sitemap.generate_sitemap( 'post', resp['posts'], 'id', "1.0")
-                news_sitemap = sitemap.generate_news_sitemap( 'story', resp['posts'][:700], 'slug', "1.0")
-            else:
-                print(resp)
-    upload_data(BUCKET, sitemap, "Application/xml", "rss/posts.xml")
-    upload_data(BUCKET, news_sitemap, "Application/xml", "rss/posts-news.xml")
-    return "OK"
 
 @app.route("/k6_to_rss")
 def generate_rss_from_k6():

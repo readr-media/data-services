@@ -13,89 +13,20 @@ tv_field_mapping = {
     'tag': 'name'
 }
 
-def post_url(style, slug, id):
-	if style == 'news' or style == 'review':
-		return "https://www.readr.tw/post/{id}"
-	if style == 'report': 
-		return "https://www.readr.tw/project/{slug}"
-	if style == 'project3': 
-		return "https://www.readr.tw/project/3/{slug}"
-
-def generate_sitemap( page, rows, uid = 'id', priority = '0.8', changefreq = 'weekly' ):
-
-    _url = "https://www.mirrormedia.mg/"  # <-- Your website domain.
-    dt = datetime.now().strftime("%Y-%m-%d")  # <-- Get current date and time.
-    
-    schema_loc = ("http://www.sitemaps.org/schemas/sitemap/0.9 "
-                  "http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd")
-
-    root = ET.Element("urlset")
-    root.attrib['xmlns:xsi'] = 'http://www.w3.org/2001/XMLSchema-instance'
-    root.attrib['xsi:schemaLocation'] = schema_loc
-    root.attrib['xmlns'] = "http://www.sitemaps.org/schemas/sitemap/0.9"
-    #root.attrib['xmlns:news'] = "http://www.sitemaps.org/schemas/sitemap-news/0.9"
-
-    for slug in rows:
-        if slug[uid] == '' or slug[uid] is None:
-            next
-        if "updatedAt" in slug and slug["updatedAt"] is not None:
-            item_time = slug["updatedAt"]
-        elif "createdAt" in slug and slug["createdAt"] is not None:
-            item_time = slug["createdAt"]
-        else:
-            item_time = dt
-        doc = ET.SubElement(root, "url")
-        ET.SubElement(doc, "loc").text = post_url(slug['style'], slug['slug'], slug['id'])
-        ET.SubElement(doc, "lastmod").text = item_time
-        #.replace(tzinfo=pytz.timezone('Asia/Taipei'))
-        ET.SubElement(doc, "changefreq").text = changefreq
-        ET.SubElement(doc, "priority").text = priority
-
-            
-    tree = ET.ElementTree(root)
-    xml_string = ET.tostring(root, encoding='utf-8')
-    return xml_string
-
-def generate_news_sitemap( page, rows, uid = 'id', priority = '0.8', changefreq = 'weekly' ):
-
-    _url = "https://www.readr.tw/"  # <-- Your website domain.
-    dt = datetime.now().strftime("%Y-%m-%d")  # <-- Get current date and time.
-    
-    #schema_loc = ("http://www.sitemaps.org/schemas/sitemap/0.9 "
-    #              "http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd")
-
-    root = ET.Element("urlset")
-    #root.attrib['xmlns:xsi'] = 'http://www.w3.org/2001/XMLSchema-instance'
-    #root.attrib['xsi:schemaLocation'] = schema_loc
-    root.attrib['xmlns'] = "http://www.sitemaps.org/schemas/sitemap/0.9"
-    root.attrib['xmlns:news'] = "http://www.google.com/schemas/sitemap-news/0.9"
-
-    for slug in rows:
-        if slug[uid] == '' or slug[uid] is None:
-            next
-        if "updatedAt" in slug and slug["updatedAt"] is not None:
-            item_time = slug["updatedAt"]
-        elif "createdAt" in slug and slug["createdAt"] is not None:
-            item_time = slug["createdAt"]
-        else:
-            item_time = dt
-        doc = ET.SubElement(root, "url")
-        ET.SubElement(doc, "loc").text = post_url(slug['style'], slug['slug'], slug['id'])
-        #ET.SubElement(doc, "lastmod").text = item_time
-        #.replace(tzinfo=pytz.timezone('Asia/Taipei'))
-        #ET.SubElement(doc, "changefreq").text = changefreq
-        #ET.SubElement(doc, "priority").text = priority
-        news_item = ET.SubElement(doc, "news:news")
-        media = ET.SubElement(news_item, "news:publication")
-        ET.SubElement(media, "news:name").text = "READr"
-        ET.SubElement(media, "news:language").text = "zh-tw"
-        ET.SubElement(news_item, "news:title").text = slug["title"]
-        ET.SubElement(news_item, "news:publication_date").text = item_time
-    tree = ET.ElementTree(root)
-    xml_string = ET.tostring(root, encoding='utf-8')
-    return xml_string
+app_mapping = {
+    'tv': {
+        'field_mapping': tv_field_mapping,
+    }
+    ### TODO: mapping for other app, eg. Readr
+}
 
 def generate_sitemap_index(sitemap_files):
+    '''
+    Input:
+        sitemap_files - All the urls of sitemap file that you'd like to submit to Google Search Console
+    Output:
+        xml_string - sitemap_index.xml
+    '''
     schema_loc = "http://www.sitemaps.org/schemas/sitemap/0.9"
     root = ET.Element('sitemapindex')
     root.attrib['xmlns'] = schema_loc
@@ -107,12 +38,12 @@ def generate_sitemap_index(sitemap_files):
     xml_string = ET.tostring(root, encoding='utf-8')
     return xml_string
 
-def generate_sitemaps(rows, object_name: str, field: str='slug', chunk_size: int=1000):
+def generate_sitemaps(rows, app: str, object_name: str, chunk_size: int=1000):
     '''
     Input:
         rows        - The json returned from gql query
-        object_name - Topics/Shows/Tags, etc...
-        field       - The field of gql row you'd like to use as appendage of url
+        app         - readr, tv, ...etc
+        object_name - tag, show, topic, ...etc
         chunk_size  - Split number of rows into multiple sitemaps by chunk_size
     Output:
         [xml_string] - The array of xml_string format after encoding='utf-8'
@@ -121,8 +52,10 @@ def generate_sitemaps(rows, object_name: str, field: str='slug', chunk_size: int
     '''
     xml_strings = []
     target_timezone = pytz.timezone('Asia/Taipei')
-    rows = rows['items']
     schema_loc = "http://www.sitemaps.org/schemas/sitemap/0.9"
+    
+    field_mapping = app_mapping[app]['field_mapping']
+    field = field_mapping[object_name]
 
     for start_index in range(0, len(rows), chunk_size):
         end_index = min(start_index+chunk_size, len(rows))

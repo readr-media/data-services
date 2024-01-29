@@ -6,14 +6,6 @@ from gql.transport.aiohttp import AIOHTTPTransport
 from gql import gql, Client
 from google.cloud import storage
 
-def save_xml(dest_filename, xml_string):
-    if xml_string:
-        dirname = os.path.dirname(dest_filename)
-        if len(dirname)>0 and not os.path.exists(dirname):
-            os.makedirs(dirname)
-        with open(dest_filename, 'wb') as f:
-            f.write(xml_string )
-
 def sheet2json( url, sheet ):
     gc = pygsheets.authorize(service_account_env_var = 'GDRIVE_API_CREDENTIALS')
     sht = gc.open_by_url( url )
