@@ -137,7 +137,7 @@ def generate_sitemaps(rows, object_name: str, field: str='slug', chunk_size: int
             updatedAt = row.get('updatedAt', None)
             if field==None or updatedAt==None:
                 continue
-            timestamp_datetime_utc  = datetime.strptime(updatedAt, "%Y-%m-%dT%H:%M:%S.%fZ")
+            timestamp_datetime_utc  = datetime.strptime(updatedAt, "%Y-%m-%dT%H:%M:%S.%f%z")
             timestamp_datetime_utc8 = timestamp_datetime_utc.astimezone(target_timezone)
             formatted_date = timestamp_datetime_utc8.strftime("%Y-%m-%d")
             
