@@ -12,6 +12,7 @@ import utils.query as query
 from datetime import datetime
 from gql import gql, Client
 from gql.transport.requests import RequestsHTTPTransport
+from sitemap import generate_sitemaps, generate_sitemap_index
 
 app = Flask(__name__)
 gql_endpoint = os.environ['GQL_ENDPOINT']
@@ -67,7 +68,7 @@ def sitemap_generator():
         gql_string = query.tv_object_mapping[object_name]
         gql_result = query.gql_fetch(gql_endpoint=gql_endpoint, gql_string=gql_string)
 
-        xml_strings = sitemap.generate_sitemaps(
+        xml_strings = generate_sitemaps(
             rows = gql_result['items'],
             app = app,
             object_name = object_name,
@@ -84,7 +85,7 @@ def sitemap_generator():
                  'filename': os.path.join(folder, filename),
                  'lastmod': lastmod
             })
-    sitemap_index_xml = sitemap.generate_sitemap_index(sitemap_files)
+    sitemap_index_xml = generate_sitemap_index(sitemap_files)
     upload_data(BUCKET, sitemap_index_xml, "Application/xml", os.path.join(folder, 'sitemap_index.xml'))
     return "ok"
 
