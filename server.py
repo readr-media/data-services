@@ -91,8 +91,9 @@ def sitemap_generator():
                  'filename': os.path.join(folder, filename),
                  'lastmod': lastmod
             })
-    sitemap_index_xml = generate_sitemap_index(sitemap_files)
-    upload_data(BUCKET, sitemap_index_xml, "Application/xml", os.path.join(folder, 'sitemap_index_web.xml'))
+    if len(sitemap_files)>0:
+        sitemap_index_xml = generate_sitemap_index(sitemap_files)
+        upload_data(BUCKET, sitemap_index_xml, "Application/xml", os.path.join(folder, 'sitemap_index_web.xml'))
     
     ### Generate sitemap for google tab news
     sitemap_files = []
@@ -120,8 +121,9 @@ def sitemap_generator():
                     'filename': os.path.join(folder, filename),
                     'lastmod': lastmod
             })
-        sitemap_index_xml = generate_sitemap_index(sitemap_files)
-        upload_data(BUCKET, sitemap_index_xml, "Application/xml", os.path.join(folder, 'sitemap_index_news.xml'))
+        if len(sitemap_files)>0:
+            sitemap_index_xml = generate_sitemap_index(sitemap_files)
+            upload_data(BUCKET, sitemap_index_xml, "Application/xml", os.path.join(folder, 'sitemap_index_news.xml'))
     return "ok"
 
 @app.route("/k6_to_rss")
