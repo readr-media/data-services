@@ -26,7 +26,7 @@ query AllTags {
 
 gql_tv_allTopics = """
 query AllTopics {
-    items: allTopics(sortBy: [updatedAt_DESC], where: { slug_not: null }) {
+    items: allTopics(sortBy: [updatedAt_DESC], where: { slug_not: null, state: published }) {
         id
         slug
         updatedAt
