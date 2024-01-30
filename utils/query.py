@@ -49,7 +49,7 @@ query AllShows {
 def get_allPosts_string(publishTime: str):
     gql_tv_allPosts = f"""
     query AllPosts {{
-        allPosts(
+        items: allPosts(
             where: {{ slug_not: null, state: published, publishTime_gt: "{publishTime}" }}
             sortBy: [publishTime_DESC]
         ) {{
