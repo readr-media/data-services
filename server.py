@@ -9,10 +9,10 @@ import json
 import pytz
 import utils.query as query
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from gql import gql, Client
 from gql.transport.requests import RequestsHTTPTransport
-from sitemap import generate_sitemaps, generate_sitemap_index
+from sitemap import generate_web_sitemaps, generate_sitemap_index, generate_news_sitemaps
 
 app = Flask(__name__)
 gql_endpoint = os.environ['GQL_ENDPOINT']
@@ -57,18 +57,25 @@ def sitemap_generator():
     msg = request.get_json()
     target_objects = msg.get('target_objects', None)
     chunk_size = msg.get('chunk_size', 1000)
-    app = msg.get('app', 'tv')
+    app = msg.get('app', 'tv') ### TODO: Move into environment variable
     if target_objects==None:
         return "query parameters error"
     objects = [obj.strip() for obj in target_objects]
 
+    sitemap_news_days = os.environ.get('SITEMAP_NEWS_DAYS', 2)
+    timezone  = pytz.timezone('Asia/Taipei')
+
+    ### Generate sitemap for website
     sitemap_files = []
     folder = os.path.join('rss', 'sitemap')
     for object_name in objects:
-        gql_string = query.tv_object_mapping[object_name]
+        # post should be handled by other method
+        if object_name == 'post':
+              continue
+        gql_string = query.sitemap_object_mapping[object_name]
         gql_result = query.gql_fetch(gql_endpoint=gql_endpoint, gql_string=gql_string)
 
-        xml_strings = generate_sitemaps(
+        xml_strings = generate_web_sitemaps(
             rows = gql_result['items'],
             app = app,
             object_name = object_name,
@@ -78,15 +85,43 @@ def sitemap_generator():
             filename = f'sitemap_{object_name}{index+1}.xml'
             upload_data(BUCKET, sitemap_xml, "Application/xml", os.path.join(folder, filename))
             
-            time_utc  = datetime.now()
-            timezone  = pytz.timezone('Asia/Taipei')
-            lastmod = time_utc.astimezone(timezone).strftime("%Y-%m-%d")
+            time  = datetime.now(timezone)
+            lastmod = time.strftime("%Y-%m-%d")
             sitemap_files.append({
                  'filename': os.path.join(folder, filename),
                  'lastmod': lastmod
             })
     sitemap_index_xml = generate_sitemap_index(sitemap_files)
-    upload_data(BUCKET, sitemap_index_xml, "Application/xml", os.path.join(folder, 'sitemap_index.xml'))
+    upload_data(BUCKET, sitemap_index_xml, "Application/xml", os.path.join(folder, 'sitemap_index_web.xml'))
+    
+    ### Generate sitemap for google tab news
+    sitemap_files = []
+    object_name = 'post'
+    if object_name in objects:
+        alias_object_name = 'story'
+        time  = datetime.now(timezone)
+        lastmod = time.strftime("%Y-%m-%d")
+        previous_time = time - timedelta(hours=int(sitemap_news_days)*24)
+        publish_gt_time = previous_time.strftime("%Y-%m-%d")
+
+        # In news sitemap, practically you can only parse the posts within 2 days
+        gql_string = query.get_allPosts_string(publish_gt_time)
+        gql_result = query.gql_fetch(gql_endpoint=gql_endpoint, gql_string=gql_string)
+        xml_strings = generate_news_sitemaps(
+                rows = gql_result['items'],
+                app = app,
+                language = 'zh-tw',
+                chunk_size = chunk_size
+            )
+        for index, sitemap_xml in enumerate(xml_strings):
+            filename = f'sitemap_{alias_object_name}{index+1}.xml'
+            upload_data(BUCKET, sitemap_xml, "Application/xml", os.path.join(folder, filename))
+            sitemap_files.append({
+                    'filename': os.path.join(folder, filename),
+                    'lastmod': lastmod
+            })
+        sitemap_index_xml = generate_sitemap_index(sitemap_files)
+        upload_data(BUCKET, sitemap_index_xml, "Application/xml", os.path.join(folder, 'sitemap_index_news.xml'))
     return "ok"
 
 @app.route("/k6_to_rss")

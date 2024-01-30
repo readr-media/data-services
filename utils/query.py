@@ -12,7 +12,7 @@ def gql_fetch(gql_endpoint, gql_string, gql_variable=None):
         json_data = gql_client.execute(gql(gql_string), variable_values=gql_variable)
     return json_data
 
-gql_tv_allTags = """
+gql_allTags = """
 query AllTags {
     items: allTags(sortBy: [updatedAt_DESC], where: {slug_not: null}) {
         id
@@ -24,7 +24,7 @@ query AllTags {
 }
 """
 
-gql_tv_allTopics = """
+gql_allTopics = """
 query AllTopics {
     items: allTopics(sortBy: [updatedAt_DESC], where: { slug_not: null, state: published }) {
         id
@@ -35,7 +35,7 @@ query AllTopics {
 }
 """
 
-gql_tv_allShows = """
+gql_allShows = """
 query AllShows {
     items: allShows(sortBy: [updatedAt_DESC], where: { slug_not: null }) {
         id
@@ -46,8 +46,24 @@ query AllShows {
 }
 """
 
-tv_object_mapping = {
-    'show': gql_tv_allShows,
-    'topic': gql_tv_allTopics,
-    'tag': gql_tv_allTags
+def get_allPosts_string(publishTime: str):
+    gql_tv_allPosts = f"""
+    query AllPosts {{
+        allPosts(
+            where: {{ slug_not: null, state: published, publishTime_gt: "{publishTime}" }}
+            sortBy: [publishTime_DESC]
+        ) {{
+            id
+            slug
+            name
+            publishTime
+        }}
+    }}
+    """
+    return gql_tv_allPosts
+
+sitemap_object_mapping = {
+    'show': gql_allShows,
+    'topic': gql_allTopics,
+    'tag': gql_allTags
 }
