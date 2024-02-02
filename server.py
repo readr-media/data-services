@@ -57,11 +57,11 @@ def sitemap_generator():
     msg = request.get_json()
     target_objects = msg.get('target_objects', None)
     chunk_size = msg.get('chunk_size', 1000)
-    app = msg.get('app', 'tv') ### TODO: Move into environment variable
     if target_objects==None:
         return "query parameters error"
     objects = [obj.strip() for obj in target_objects]
 
+    app = os.environ.get('app', 'tv')
     sitemap_news_days = os.environ.get('SITEMAP_NEWS_DAYS', 2)
     timezone  = pytz.timezone('Asia/Taipei')
 
@@ -93,7 +93,7 @@ def sitemap_generator():
             })
     if len(sitemap_files)>0:
         sitemap_index_xml = generate_sitemap_index(sitemap_files)
-        upload_data(BUCKET, sitemap_index_xml, "Application/xml", os.path.join(folder, 'sitemap_index_web.xml'))
+        upload_data(BUCKET, sitemap_index_xml, "Application/xml", os.path.join(folder, 'sitemap_index_web_others.xml'))
     
     ### Generate sitemap for google tab news
     sitemap_files = []
@@ -123,7 +123,7 @@ def sitemap_generator():
             })
         if len(sitemap_files)>0:
             sitemap_index_xml = generate_sitemap_index(sitemap_files)
-            upload_data(BUCKET, sitemap_index_xml, "Application/xml", os.path.join(folder, 'sitemap_index_news.xml'))
+            upload_data(BUCKET, sitemap_index_xml, "Application/xml", os.path.join(folder, 'sitemap_index_newstab.xml'))
     return "ok"
 
 @app.route("/k6_to_rss")
