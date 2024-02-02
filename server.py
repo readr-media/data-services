@@ -61,7 +61,7 @@ def sitemap_generator():
         return "query parameters error"
     objects = [obj.strip() for obj in target_objects]
 
-    app = os.environ.get('app', 'tv')
+    app = os.environ.get('PROJECT_NAME', 'mnews')
     sitemap_news_days = os.environ.get('SITEMAP_NEWS_DAYS', 2)
     timezone  = pytz.timezone('Asia/Taipei')
 

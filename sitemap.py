@@ -7,7 +7,7 @@ from datetime import datetime
 BASE_URL = os.environ.get('BASE_URL', None)
 BUCKET   = os.environ.get('BUCKET', None)
 
-tv_field_mapping = {
+mnews_field_mapping = {
     'show': 'slug',
     'topic': 'slug',
     'tag': 'name',
@@ -15,8 +15,8 @@ tv_field_mapping = {
 }
 
 app_mapping = {
-    'tv': {
-        'field_mapping': tv_field_mapping,
+    'mnews': {
+        'field_mapping': mnews_field_mapping,
         'publisher_name': '鏡電視',
     }
     ### TODO: mapping for other app, eg. Readr
