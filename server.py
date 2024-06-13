@@ -128,18 +128,21 @@ def sitemap_generator():
 
 @app.route("/k6_to_rss")
 def generate_rss_from_k6():
-	gql_string = request.args.get('gql_string')
-	bucket = request.args.get('bucket')
-	schema_type = request.args.get('schema_type')
-	dest_file = request.args.get('dest_file')
-	relatedPost = request.args.get('relatedPost')
-	rm_ytbiframe = request.args.get('rm_ytbiframe')
-	relatedPost_number = request.args.get('relatedPost_number')
-	rss_data = gql2rss(gql_endpoint, gql_string, schema_type, relatedPost, rm_ytbiframe, relatedPost_number)
-	if rss_data:
-		upload_data(bucket, rss_data, 'application/xml', dest_file)
-		return "ok"
-	return "fail"
+    gql_string = request.args.get('gql_string')
+    bucket = request.args.get('bucket')
+    schema_type = request.args.get('schema_type')
+    dest_file = request.args.get('dest_file')
+    relatedPost = request.args.get('relatedPost')
+    rm_ytbiframe = request.args.get('rm_ytbiframe')
+    relatedPost_number = request.args.get('relatedPost_number')
+    rss_data = gql2rss(gql_endpoint, gql_string, schema_type, relatedPost, rm_ytbiframe, relatedPost_number)
+     
+    print(dest_file)
+
+    if rss_data:
+        upload_data(bucket, rss_data, 'application/xml', dest_file)
+        return "ok"
+    return "fail"
 
 @app.route("/mirrormedia_podcast")
 def get_podcasts_from_mirrorvoice():
