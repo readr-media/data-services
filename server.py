@@ -57,21 +57,30 @@ def sitemap_generator():
     msg = request.get_json()
     target_objects = msg.get('target_objects', None)
     chunk_size = msg.get('chunk_size', 1000)
+    requestFrom = msg.get('requestFrom', None)
     if target_objects==None:
+        return "query parameters error"
+    if requestFrom == None:
         return "query parameters error"
     objects = [obj.strip() for obj in target_objects]
 
     app = os.environ.get('PROJECT_NAME', 'mnews')
+    if requestFrom == "mnews":
+        app = os.environ.get('PROJECT_NAME', 'mnews')
+    if requestFrom == "mirrordaily":
+        app = os.environ.get('PROJECT_NAME', 'mirrordaily')
+
     sitemap_news_days = os.environ.get('SITEMAP_NEWS_DAYS', 2)
     timezone  = pytz.timezone('Asia/Taipei')
 
     ### Generate sitemap for website
-    sitemap_files = []
     folder = os.path.join('rss', 'sitemap')
+    
+    sitemap_files = []
     for object_name in objects:
         # post should be handled by other method
         if object_name == 'post':
-              continue
+            continue
         gql_string = query.sitemap_object_mapping[object_name]
         gql_result = query.gql_fetch(gql_endpoint=gql_endpoint, gql_string=gql_string)
 
@@ -88,8 +97,8 @@ def sitemap_generator():
             time  = datetime.now(timezone)
             lastmod = time.strftime("%Y-%m-%d")
             sitemap_files.append({
-                 'filename': os.path.join(folder, filename),
-                 'lastmod': lastmod
+                'filename': os.path.join(folder, filename),
+                'lastmod': lastmod
             })
     if len(sitemap_files)>0:
         sitemap_index_xml = generate_sitemap_index(sitemap_files)
@@ -123,8 +132,12 @@ def sitemap_generator():
             })
         if len(sitemap_files)>0:
             sitemap_index_xml = generate_sitemap_index(sitemap_files)
-            upload_data(BUCKET, sitemap_index_xml, "Application/xml", os.path.join(folder, 'sitemap_index_newstab.xml'))
+            if requestFrom == 'mnews': 
+                upload_data(BUCKET, sitemap_index_xml, "Application/xml", os.path.join(folder, 'sitemap_index_newstab.xml'))
+            elif requestFrom == 'mirrordaily': 
+                upload_data(BUCKET, sitemap_index_xml, "Application/xml", os.path.join(folder, 'index.xml'))
     return "ok"
+    
 
 @app.route("/k6_to_rss")
 def generate_rss_from_k6():

@@ -14,12 +14,20 @@ mnews_field_mapping = {
     'post': 'slug'
 }
 
+mirror_field_mapping = {
+    'post':'slug'
+}
+
 app_mapping = {
     'mnews': {
         'field_mapping': mnews_field_mapping,
         'publisher_name': '鏡電視',
-    }
+    },
     ### TODO: mapping for other app, eg. Readr
+    'mirrordaily':{
+        'field_mapping': mirror_field_mapping,
+        'publisher_name': '鏡報',
+    }
 }
 
 def generate_sitemap_index(sitemap_files):
