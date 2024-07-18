@@ -59,6 +59,7 @@ def sitemap_generator():
     chunk_size = msg.get('chunk_size', 1000)
     if target_objects==None:
         return "query parameters error"
+    
     objects = [obj.strip() for obj in target_objects]
 
     app = os.environ.get('PROJECT_NAME', 'mnews')
@@ -68,10 +69,11 @@ def sitemap_generator():
     ### Generate sitemap for website
     sitemap_files = []
     folder = os.path.join('rss', 'sitemap')
+    
     for object_name in objects:
         # post should be handled by other method
         if object_name == 'post':
-              continue
+            continue
         gql_string = query.sitemap_object_mapping[object_name]
         gql_result = query.gql_fetch(gql_endpoint=gql_endpoint, gql_string=gql_string)
 
@@ -88,8 +90,8 @@ def sitemap_generator():
             time  = datetime.now(timezone)
             lastmod = time.strftime("%Y-%m-%d")
             sitemap_files.append({
-                 'filename': os.path.join(folder, filename),
-                 'lastmod': lastmod
+                'filename': os.path.join(folder, filename),
+                'lastmod': lastmod
             })
     if len(sitemap_files)>0:
         sitemap_index_xml = generate_sitemap_index(sitemap_files)
@@ -123,8 +125,12 @@ def sitemap_generator():
             })
         if len(sitemap_files)>0:
             sitemap_index_xml = generate_sitemap_index(sitemap_files)
-            upload_data(BUCKET, sitemap_index_xml, "Application/xml", os.path.join(folder, 'sitemap_index_newstab.xml'))
+            if app == 'mnews': 
+                upload_data(BUCKET, sitemap_index_xml, "Application/xml", os.path.join(folder, 'sitemap_index_newstab.xml'))
+            else:
+                upload_data(BUCKET, sitemap_index_xml, "Application/xml", os.path.join(folder, 'index.xml'))
     return "ok"
+    
 
 @app.route("/k6_to_rss")
 def generate_rss_from_k6():
