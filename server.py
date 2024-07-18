@@ -57,7 +57,6 @@ def sitemap_generator():
     msg = request.get_json()
     target_objects = msg.get('target_objects', None)
     chunk_size = msg.get('chunk_size', 1000)
-    requestFrom = msg.get('requestFrom', None)
     if target_objects==None:
         return "query parameters error"
     
