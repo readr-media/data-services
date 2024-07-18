@@ -67,9 +67,9 @@ def sitemap_generator():
     timezone  = pytz.timezone('Asia/Taipei')
 
     ### Generate sitemap for website
+    sitemap_files = []
     folder = os.path.join('rss', 'sitemap')
     
-    sitemap_files = []
     for object_name in objects:
         # post should be handled by other method
         if object_name == 'post':
