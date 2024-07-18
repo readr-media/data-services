@@ -60,16 +60,10 @@ def sitemap_generator():
     requestFrom = msg.get('requestFrom', None)
     if target_objects==None:
         return "query parameters error"
-    if requestFrom == None:
-        return "query parameters error"
+    
     objects = [obj.strip() for obj in target_objects]
 
     app = os.environ.get('PROJECT_NAME', 'mnews')
-    if requestFrom == "mnews":
-        app = os.environ.get('PROJECT_NAME', 'mnews')
-    if requestFrom == "mirrordaily":
-        app = os.environ.get('PROJECT_NAME', 'mirrordaily')
-
     sitemap_news_days = os.environ.get('SITEMAP_NEWS_DAYS', 2)
     timezone  = pytz.timezone('Asia/Taipei')
 
@@ -132,10 +126,10 @@ def sitemap_generator():
             })
         if len(sitemap_files)>0:
             sitemap_index_xml = generate_sitemap_index(sitemap_files)
-            if requestFrom == 'mnews': 
-                upload_data(BUCKET, sitemap_index_xml, "Application/xml", os.path.join(folder, 'sitemap_index_newstab.xml'))
-            elif requestFrom == 'mirrordaily': 
+            if app == 'mirrordaily': 
                 upload_data(BUCKET, sitemap_index_xml, "Application/xml", os.path.join(folder, 'index.xml'))
+            else: 
+                upload_data(BUCKET, sitemap_index_xml, "Application/xml", os.path.join(folder, 'sitemap_index_newstab.xml'))
     return "ok"
     
 
