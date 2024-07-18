@@ -125,10 +125,10 @@ def sitemap_generator():
             })
         if len(sitemap_files)>0:
             sitemap_index_xml = generate_sitemap_index(sitemap_files)
-            if app == 'mirrordaily': 
-                upload_data(BUCKET, sitemap_index_xml, "Application/xml", os.path.join(folder, 'index.xml'))
-            else: 
+            if app == 'mnews': 
                 upload_data(BUCKET, sitemap_index_xml, "Application/xml", os.path.join(folder, 'sitemap_index_newstab.xml'))
+            else:
+                upload_data(BUCKET, sitemap_index_xml, "Application/xml", os.path.join(folder, 'index.xml'))
     return "ok"
     
 
