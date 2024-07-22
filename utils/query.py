@@ -66,7 +66,7 @@ def get_Posts_string(publishTime: str):
     gql_posts = f"""
     query Posts {{
         items: posts(
-            where: {{ state: published, publishDate: {{gt:"{publishTime}"}} }}
+            where: {{ state: {{euqals:published}}, publishDate: {{gt:"{publishTime}"}} }}
             orderBy: {{publishDate:desc}}
         ) {{
             id
