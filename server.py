@@ -103,9 +103,12 @@ def sitemap_generator():
     if object_name in objects:
         alias_object_name = 'story'
         time  = datetime.now(timezone)
-        lastmod = time.strftime("%Y-%m-%d")
+        # use ISO 8601 time format
+        lastmod = time.isoformat()
         previous_time = time - timedelta(hours=int(sitemap_news_days)*24)
-        publish_gt_time = previous_time.strftime("%Y-%m-%d")
+        publish_gt_time = previous_time.isoformat()
+        # lastmod = time.strftime("%Y-%m-%d")
+        # publish_gt_time = previous_time.strftime("%Y-%m-%d")
 
         # In news sitemap, practically you can only parse the posts within 2 days
         gql_string = ""
