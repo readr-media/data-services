@@ -108,7 +108,11 @@ def sitemap_generator():
         publish_gt_time = previous_time.strftime("%Y-%m-%d")
 
         # In news sitemap, practically you can only parse the posts within 2 days
-        gql_string = query.get_allPosts_string(publish_gt_time)
+        gql_string
+        if app == 'mnews':
+            gql_string = query.get_allPosts_string(publish_gt_time)
+        else:
+            gql_string = query.get_Posts_string(publish_gt_time)
         gql_result = query.gql_fetch(gql_endpoint=gql_endpoint, gql_string=gql_string)
         xml_strings = generate_news_sitemaps(
                 rows = gql_result['items'],
