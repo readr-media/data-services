@@ -114,8 +114,6 @@ def sitemap_generator():
         else:
             gql_string = query.get_Posts_string(publish_gt_time)
 	
-	if not gql_string:
-            raise ValueError("Failed to generate GQL query string")
 	print(gql_string)
         gql_result = query.gql_fetch(gql_endpoint=gql_endpoint, gql_string=gql_string)
         xml_strings = generate_news_sitemaps(
