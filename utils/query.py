@@ -67,7 +67,7 @@ def get_Posts_string(publishTime: str):
     query {{
         posts(
             where: {{ 
-                state: {{ equals: published }}, publishedDate: {{ gt: "{publishTime}" }} 
+                state: {{ equals: "published" }}, publishedDate: {{ gt: "{publishTime}" }} 
             }}
             orderBy: {{ publishedDate: desc }}
         ) {{
