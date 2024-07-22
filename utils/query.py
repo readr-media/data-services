@@ -74,7 +74,7 @@ def get_Posts_string(publishTime: str):
             id
             slug
             title
-            publishDate
+            publishedDate
         }}
     }}
     """
