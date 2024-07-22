@@ -64,10 +64,12 @@ def get_allPosts_string(publishTime: str):
 
 def get_Posts_string(publishTime: str):
     gql_posts = f"""
-    query Posts {{
-        items: posts(
-            where: {{ state: {{euqals:published}}, publishDate: {{gt:"{publishTime}"}} }}
-            orderBy: {{publishDate:desc}}
+    query {{
+        posts(
+            where: {{ 
+                state: {{ equals: "published" }}, publishedDate: {{ gt: "{publishTime}" }} 
+            }}
+            orderBy: {{ publishedDate: desc }}
         ) {{
             id
             slug
