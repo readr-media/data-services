@@ -30,7 +30,6 @@ def merge_json_data():
     bucket = request.args.get('bucket')
     dest_file = request.args.get('dest_file')
     json_data = gql2json(GQL_ENDPOINT, gql_string)
-    print(json_data)
     if "allPosts" in json_data and isinstance(json_data["allPosts"], list):
         final["relatedPost"] = []
         for post in json_data["allPosts"]:
