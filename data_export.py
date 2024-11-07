@@ -58,6 +58,18 @@ def sheet2json( url, sheet ):
 
         sheets_obj[sheet_title] = all_rows
     return sheets_obj
+
+def gql2json(gql_endpoint, gql_string):
+    #bucket = os.environ['BUCKET']
+    #destination = os.environ('DEST']
+    gql_transport = AIOHTTPTransport(url=gql_endpoint)
+    gql_client = Client(transport=gql_transport,
+                        fetch_schema_from_transport=False)
+    # sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
+    query = gql(gql_string)
+    json_data = gql_client.execute(query)
+    #upload_data(bucket, json.dumps(json_data, ensure_ascii=False).encode('utf8'), 'application/json', gcs_path + DEST)
+    return json_data
 	
 def upload_data(bucket_name: str, data: str, content_type: str, destination_blob_name: str):
     '''Uploads a file to the bucket.'''
