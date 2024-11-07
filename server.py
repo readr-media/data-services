@@ -31,7 +31,7 @@ def merge_json_data():
     dest_file = request.args.get('dest_file')
     json_data = gql2json(GQL_ENDPOINT, gql_string)
     print(json_data)
-    if "posts" in json_data and isinstance(json_data["posts"], list):
+    if "allPosts" in json_data and isinstance(json_data["allPosts"], list):
         final["relatedPost"] = []
         for post in json_data["allPosts"]:
             post["url"] = "https://www.mnews.tw/story/" + post["slug"]
