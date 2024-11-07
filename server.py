@@ -17,6 +17,26 @@ from sitemap import generate_web_sitemaps, generate_sitemap_index, generate_news
 app = Flask(__name__)
 gql_endpoint = os.environ['GQL_ENDPOINT']
 BUCKET = os.environ.get('BUCKET', None)
+GQL_ENDPOINT = os.environ.get('GQL_ENDPOINT', None)
+
+@app.route("/forum_data")
+def merge_json_data():
+    final = {}
+    sheet_url = request.args.get('sheet_url')
+    sheet_name = request.args.get('sheet_name')
+    sheet_data = sheet2json(sheet_url, sheet_name)
+    final["metadata"] = sheet_data
+    gql_string = request.args.get('gql_string')
+    bucket = request.args.get('bucket')
+    dest_file = request.args.get('dest_file')
+    json_data = gql2json(GQL_ENDPOINT, gql_string)
+    if "allPosts" in json_data and isinstance(json_data["allPosts"], list):
+        final["relatedPost"] = []
+        for post in json_data["allPosts"]:
+            post["url"] = "https://www.mnews.tw/story/" + post["slug"]
+            final["relatedPost"].append(post)
+    upload_data(bucket, json.dumps(final, ensure_ascii=False).encode('utf8'), 'application/json', dest_file)
+    return "ok"
 
 @app.route("/gql_to_json")
 def generate_json_from_gql():
@@ -59,6 +79,7 @@ def sitemap_generator():
     chunk_size = msg.get('chunk_size', 1000)
     if target_objects==None:
         return "query parameters error"
+    
     objects = [obj.strip() for obj in target_objects]
 
     app = os.environ.get('PROJECT_NAME', 'mnews')
@@ -68,10 +89,11 @@ def sitemap_generator():
     ### Generate sitemap for website
     sitemap_files = []
     folder = os.path.join('rss', 'sitemap')
+    
     for object_name in objects:
         # post should be handled by other method
         if object_name == 'post':
-              continue
+            continue
         gql_string = query.sitemap_object_mapping[object_name]
         gql_result = query.gql_fetch(gql_endpoint=gql_endpoint, gql_string=gql_string)
 
@@ -88,8 +110,8 @@ def sitemap_generator():
             time  = datetime.now(timezone)
             lastmod = time.strftime("%Y-%m-%d")
             sitemap_files.append({
-                 'filename': os.path.join(folder, filename),
-                 'lastmod': lastmod
+                'filename': os.path.join(folder, filename),
+                'lastmod': lastmod
             })
     if len(sitemap_files)>0:
         sitemap_index_xml = generate_sitemap_index(sitemap_files)
@@ -101,12 +123,22 @@ def sitemap_generator():
     if object_name in objects:
         alias_object_name = 'story'
         time  = datetime.now(timezone)
-        lastmod = time.strftime("%Y-%m-%d")
+        # use ISO 8601 time format
+        lastmod = time.isoformat()
         previous_time = time - timedelta(hours=int(sitemap_news_days)*24)
-        publish_gt_time = previous_time.strftime("%Y-%m-%d")
+        publish_gt_time = previous_time.isoformat()
+        # lastmod = time.strftime("%Y-%m-%d")
+        # publish_gt_time = previous_time.strftime("%Y-%m-%d")
 
         # In news sitemap, practically you can only parse the posts within 2 days
-        gql_string = query.get_allPosts_string(publish_gt_time)
+        gql_string = ""
+        if app == 'mnews':
+            gql_string = query.get_allPosts_string(publish_gt_time)
+        else:
+            gql_string = query.get_Posts_string(publish_gt_time)
+        
+        print(gql_string)
+	
         gql_result = query.gql_fetch(gql_endpoint=gql_endpoint, gql_string=gql_string)
         xml_strings = generate_news_sitemaps(
                 rows = gql_result['items'],
@@ -123,23 +155,28 @@ def sitemap_generator():
             })
         if len(sitemap_files)>0:
             sitemap_index_xml = generate_sitemap_index(sitemap_files)
-            upload_data(BUCKET, sitemap_index_xml, "Application/xml", os.path.join(folder, 'sitemap_index_newstab.xml'))
+            if app == 'mnews': 
+                upload_data(BUCKET, sitemap_index_xml, "Application/xml", os.path.join(folder, 'sitemap_index_newstab.xml'))
+            else:
+                upload_data(BUCKET, sitemap_index_xml, "Application/xml", os.path.join(folder, 'index.xml'))
     return "ok"
+    
 
 @app.route("/k6_to_rss")
 def generate_rss_from_k6():
-	gql_string = request.args.get('gql_string')
-	bucket = request.args.get('bucket')
-	schema_type = request.args.get('schema_type')
-	dest_file = request.args.get('dest_file')
-	relatedPost = request.args.get('relatedPost')
-	rm_ytbiframe = request.args.get('rm_ytbiframe')
-	relatedPost_number = request.args.get('relatedPost_number')
-	rss_data = gql2rss(gql_endpoint, gql_string, schema_type, relatedPost, rm_ytbiframe, relatedPost_number)
-	if rss_data:
-		upload_data(bucket, rss_data, 'application/xml', dest_file)
-		return "ok"
-	return "fail"
+    gql_string = request.args.get('gql_string')
+    bucket = request.args.get('bucket')
+    schema_type = request.args.get('schema_type')
+    dest_file = request.args.get('dest_file')
+    relatedPost = request.args.get('relatedPost')
+    rm_ytbiframe = request.args.get('rm_ytbiframe')
+    relatedPost_number = request.args.get('relatedPost_number')
+    rss_data = gql2rss(gql_endpoint, gql_string, schema_type, relatedPost, rm_ytbiframe, relatedPost_number)
+
+    if rss_data:
+        upload_data(bucket, rss_data, 'application/xml', dest_file)
+        return "ok"
+    return "fail"
 
 @app.route("/mirrormedia_podcast")
 def get_podcasts_from_mirrorvoice():
