@@ -33,7 +33,7 @@ def merge_json_data():
     print(json_data)
     if "posts" in json_data and isinstance(json_data["posts"], list):
         final["relatedPost"] = []
-        for post in json_data["posts"]:
+        for post in json_data["allPosts"]:
             post["url"] = "https://www.mnews.tw/story/" + post["slug"]
             final["relatedPost"].append(post)
     upload_data(bucket, json.dumps(final, ensure_ascii=False).encode('utf8'), 'application/json', dest_file)
