@@ -17,6 +17,7 @@ from sitemap import generate_web_sitemaps, generate_sitemap_index, generate_news
 app = Flask(__name__)
 gql_endpoint = os.environ['GQL_ENDPOINT']
 BUCKET = os.environ.get('BUCKET', None)
+GQL_ENDPOINT = os.environ.get('GQL_ENDPOINT', None)
 
 @app.route("/forum_data")
 def merge_json_data():
