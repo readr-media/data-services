@@ -18,6 +18,26 @@ app = Flask(__name__)
 gql_endpoint = os.environ['GQL_ENDPOINT']
 BUCKET = os.environ.get('BUCKET', None)
 
+@app.route("/forum_data")
+def merge_json_data():
+    final = {}
+    sheet_url = request.args.get('sheet_url')
+    sheet_name = request.args.get('sheet_name')
+    sheet_data = sheet2json(sheet_url, sheet_name)
+    final["metadata"] = sheet_data
+    gql_string = request.args.get('gql_string')
+    bucket = request.args.get('bucket')
+    dest_file = request.args.get('dest_file')
+    json_data = gql2json(GQL_ENDPOINT, gql_string)
+    print(json_data)
+    if "posts" in json_data and isinstance(json_data["posts"], list):
+        final["relatedPost"] = []
+        for post in json_data["posts"]:
+            post["url"] = "https://www.mnews.tw/story/" + post["slug"]
+            final["relatedPost"].append(post)
+    upload_data(bucket, json.dumps(final, ensure_ascii=False).encode('utf8'), 'application/json', dest_file)
+    return "ok"
+
 @app.route("/gql_to_json")
 def generate_json_from_gql():
 	gql_string = request.args.get('gql_string')
